@@ -1,0 +1,22 @@
+name: stackcoin
+version: 3.0.0
+
+authors:
+  - Jack Harrhy <me@jackharrhy.com>
+
+targets:
+  stackcoin:
+    main: src/cli.cr
+
+dependencies:
+  discordcr:
+    github: discordcr/discordcr
+    branch: master
+
+  dotenv:
+    github: gdotdesign/cr-dotenv
+
+  json_mapping:
+    github: crystal-lang/json_mapping.cr
+
+crystal: 0.35.1

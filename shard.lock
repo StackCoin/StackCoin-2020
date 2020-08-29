@@ -1,0 +1,14 @@
+version: 2.0
+shards:
+  discordcr:
+    git: https://github.com/discordcr/discordcr.git
+    version: 0.4.0+git.commit.619e08d31fd10918f2554f7623e2066ac308c439
+
+  dotenv:
+    git: https://github.com/gdotdesign/cr-dotenv.git
+    version: 0.7.0
+
+  json_mapping:
+    git: https://github.com/crystal-lang/json_mapping.cr.git
+    version: 0.1.0
+
