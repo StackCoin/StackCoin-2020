@@ -9,6 +9,12 @@ targets:
     main: src/cli.cr
 
 dependencies:
+  pg:
+    github: will/crystal-pg
+
+  micrate:
+    github: amberframework/micrate
+
   discordcr:
     github: discordcr/discordcr
     branch: master

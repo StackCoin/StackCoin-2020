@@ -1,4 +1,3 @@
-
 class StackCoin::Bot::Commands
   class Leaderboard < Command
     getter trigger = "leaderboard"

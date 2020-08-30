@@ -101,13 +101,13 @@ class StackCoin::Bot::Parser
   end
 
   def self.parse(string : String)
-    arguments = Array(Argument).new
-
     parser = new(string)
 
     return if !parser.saw_prefix
 
     command = parser.read_argument.to_s
+
+    arguments = Array(Argument).new
 
     parser.parse do |parsed|
       case parsed

@@ -17,15 +17,23 @@ class StackCoin::Bot
     end
 
     abstract def invoke(message : Discord::Message, parsed : ParsedCommand)
+
+    def client
+    end
   end
 end
 
-require "./bot/commands/*"
+# TODO bring back require "./bot/commands/*"
+
+require "./bot/commands/leaderboard"
+require "./bot/commands/send"
 
 class StackCoin::Bot
   TOKEN     = "Bot #{ENV["STACKCOIN_DISCORD_TOKEN"]}"
   CLIENT_ID = ENV["STACKCOIN_DISCORD_CLIENT_ID"].to_u64
-  PREFIX = ENV["STACKCOIN_DISCORD_PREFIX"]
+  PREFIX    = ENV["STACKCOIN_DISCORD_PREFIX"]
+
+  INSTANCE = new
 
   getter client : Discord::Client
   getter cache : Discord::Cache
@@ -45,16 +53,16 @@ class StackCoin::Bot
         next if message.guild_id.is_a?(Nil) || message.author.bot
         handle_message(message)
       rescue ex : Parser::Error
-        msg(message, "Invalid argument: #{ex.message}")
+        send_message(message, "Invalid argument: #{ex.message}")
       rescue ex
         # TODO error logging
         # Log.error { "Exception while invoking discord command: #{ex.inspect_with_backtrace}" }
-        msg(message, "```#{ex.inspect_with_backtrace}```")
+        send_message(message, "```#{ex.inspect_with_backtrace}```")
       end
     end
   end
 
-  def msg(message, content)
+  def send_message(message, content)
     @client.create_message(message.channel_id, content)
   end
 
@@ -92,11 +100,11 @@ class StackCoin::Bot
         postfix = ", did you mean `#{potential}`?"
       end
 
-      msg(message, "Unknown command: `#{parsed.command}`#{postfix}")
+      send_message(message, "Unknown command: `#{parsed.command}`#{postfix}")
     end
   end
 
   def self.run!
-    new.client.run
+    INSTANCE.client.run
   end
 end
