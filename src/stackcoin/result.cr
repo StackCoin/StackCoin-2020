@@ -18,23 +18,13 @@ class StackCoin::Result
     def initialize(@message)
       @success = name
     end
-
-    def initialize(db : DB::Transaction, @message)
-      initialize(@message)
-      db.commit
-    end
   end
 
-  class Error < Base
-    property error : String
+  class Failure < Base
+    property failure : String
 
     def initialize(@message)
-      @error = name
-    end
-
-    def initialize(db : DB::Transaction, @message)
-      initialize(@message)
-      db.rollback
+      @failure = name
     end
   end
 end

@@ -32,6 +32,7 @@ CREATE TABLE "transaction" (
   "to_id" integer not null references "user"(id),
   "to_new_balance" integer not null CHECK ("to_new_balance" >= 0),
   time timestamp not null,
+  "label" text,
   CHECK ("from_id" <> "to_id")
 );
 
@@ -43,10 +44,10 @@ CREATE TABLE "request" (
   "responder_id" integer not null references "user"(id),
   "status" request_status not null,
   "amount" integer not null CHECK ("amount" > 0),
-  "label" text,
   "requested_at" timestamp not null,
   "transaction" integer references "transaction"(id),
-  "resolved_at" timestamp
+  "resolved_at" timestamp,
+  "label" text
 );
 
 COMMIT;

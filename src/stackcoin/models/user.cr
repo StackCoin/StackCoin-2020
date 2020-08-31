@@ -1,4 +1,6 @@
 abstract class StackCoin::Models::User < StackCoin::Model
+  TABLE = "\"user\""
+
   enum UserType
     Internal
     Bot
@@ -27,11 +29,11 @@ class StackCoin::Models::User::Full < StackCoin::Models::User
 
   def insert(cnn)
     query = <<-SQL
-      INSERT INTO "user"
+      INSERT INTO #{TABLE}
         (created_at, type, username, avatar_url, balance, last_given_dole, banned)
       VALUES
         ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING "user".id
+      RETURNING #{TABLE}.id
     SQL
 
     @id = cnn.query_one(
@@ -43,7 +45,7 @@ class StackCoin::Models::User::Full < StackCoin::Models::User
 
   def self.all(cnn)
     self.from_rs(cnn.query(<<-SQL))
-      SELECT * FROM "user"
+      SELECT * FROM #{TABLE}
       SQL
   end
 end

@@ -12,14 +12,29 @@ class StackCoin::Fixtures
 
     now = Time.utc
 
-    users << Models::User::Full.new(
+    john = Models::User::Full.new(
       type: Models::User::UserType::Internal,
       username: "John Doe",
     )
+    users << john
+
+    dole_result = Bank.dole(cnn, john)
+
+    p dole_result
+
+    jane = Models::User::Full.new(
+      type: Models::User::UserType::Internal,
+      username: "Jane Bar",
+    )
+    users << jane
 
     users.each do |user|
       user.insert(cnn)
     end
+
+    transfer_result = Bank.transfer(cnn, john, jane, 10)
+
+    p transfer_result
 
     pp users
   end
