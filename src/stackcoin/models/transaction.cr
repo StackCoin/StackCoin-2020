@@ -40,4 +40,3 @@ class StackCoin::Models::Transaction::Full < StackCoin::Models::Transaction
       SQL
   end
 end
-
