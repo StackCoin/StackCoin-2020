@@ -27,8 +27,8 @@ class StackCoin::Bank
     end
   end
 
-  @@dole_amount : Int32 = 10
-  @@max_transfer_amount : Int32 = 100000
+  DOLE_AMOUNT         =     10
+  MAX_TRANSFER_AMOUNT = 100000
 
   private def self.deposit(user : Models::User, amount : Int32)
     user.balance += amount
@@ -48,7 +48,7 @@ class StackCoin::Bank
       end
     end
 
-    deposit(user, @@dole_amount)
+    deposit(user, DOLE_AMOUNT)
 
     user.last_given_dole = now
 
@@ -57,7 +57,7 @@ class StackCoin::Bank
     # TODO log transaction
     # transaction = ...
 
-    # Result::SuccessfulTransaction.new("#{@@dole_amount} STK given, your balance is now #{user.balance} STK", transaction)
+    # Result::SuccessfulTransaction.new("#{DOLE_AMOUNT} STK given, your balance is now #{user.balance} STK", transaction)
   end
 
   def self.transfer(cnn : ::DB::Connection, from : Models::User, to : Models::User, amount : Int32, label : String? = nil)
@@ -75,8 +75,8 @@ class StackCoin::Bank
       return Result::InvalidAmount.new("Amount must be greater than zero")
     end
 
-    if amount > @@max_transfer_amount
-      return Result::InvalidAmount.new("Amount can't be greater than #{@@max_transfer_amount}")
+    if amount > MAX_TRANSFER_AMOUNT
+      return Result::InvalidAmount.new("Amount can't be greater than #{MAX_TRANSFER_AMOUNT}")
     end
 
     if from.banned || to.banned
