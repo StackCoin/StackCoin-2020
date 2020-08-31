@@ -8,6 +8,7 @@ class StackCoin::Bank
       property to_balance : Int32
 
       def initialize(@message, @from_balance, @to_balance)
+        super
       end
     end
 

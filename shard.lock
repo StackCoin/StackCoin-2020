@@ -12,6 +12,14 @@ shards:
     git: https://github.com/gdotdesign/cr-dotenv.git
     version: 0.7.0
 
+  humanize_time:
+    git: https://github.com/mamantoha/humanize_time.git
+    version: 0.7.0
+
+  i18n:
+    git: https://github.com/TechMagister/i18n.cr.git
+    version: 0.3.1+git.commit.635e05dd5e9fb8bc99c46c12497689221644d9e4
+
   json_mapping:
     git: https://github.com/crystal-lang/json_mapping.cr.git
     version: 0.1.0

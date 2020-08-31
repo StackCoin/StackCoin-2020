@@ -5,9 +5,9 @@ require "micrate"
 
 require "./stackcoin/config.cr"
 require "./stackcoin/db.cr"
-# require "./stackcoin/core"
 require "./stackcoin/models"
 require "./stackcoin/fixtures"
+require "./stackcoin/core"
 require "./stackcoin/bot"
 
 module StackCoin

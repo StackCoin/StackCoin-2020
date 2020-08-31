@@ -57,7 +57,12 @@ class StackCoin::Bot
       rescue ex
         # TODO error logging
         # Log.error { "Exception while invoking discord command: #{ex.inspect_with_backtrace}" }
-        send_message(message, "```#{ex.inspect_with_backtrace}```")
+        send_message(message, <<-MESSAGE)
+          `Error: #{ex.message}`
+          ```
+          #{ex.inspect_with_backtrace}
+          ```
+          MESSAGE
       end
     end
   end

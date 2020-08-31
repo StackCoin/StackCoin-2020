@@ -28,4 +28,7 @@ dependencies:
   json_mapping:
     github: crystal-lang/json_mapping.cr
 
+  humanize_time:
+    github: mamantoha/humanize_time
+
 crystal: 0.35.1
