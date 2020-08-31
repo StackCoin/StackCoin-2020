@@ -18,7 +18,7 @@ class StackCoin::Fixtures
     )
     users << john
 
-    dole_result = Bank.dole(cnn, john)
+    dole_result = Core::StackCoinReserveSystem.dole(cnn, john)
 
     p dole_result
 
@@ -32,7 +32,7 @@ class StackCoin::Fixtures
       user.insert(cnn)
     end
 
-    transfer_result = Bank.transfer(cnn, john, jane, 10)
+    transfer_result = Core::Bank.transfer(cnn, from: john, to: jane, amount: 10)
 
     p transfer_result
 

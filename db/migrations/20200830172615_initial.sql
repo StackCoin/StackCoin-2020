@@ -14,6 +14,11 @@ CREATE TABLE "user" (
   "banned" boolean not null
 );
 
+CREATE TABLE "internal_user" (
+  "id" integer PRIMARY KEY references "user"(id),
+  "identifier" text not null UNIQUE
+);
+
 CREATE TABLE "bot_user" (
   "id" integer PRIMARY KEY references "user"(id),
   "token" text not null UNIQUE
@@ -36,7 +41,7 @@ CREATE TABLE "transaction" (
   CHECK ("from_id" <> "to_id")
 );
 
-CREATE TYPE request_status AS ENUM ('pending', 'accepted', 'denied');
+CREATE TYPE request_status AS ENUM ('Pending', 'Accepted', 'Denied');
 
 CREATE TABLE "request" (
   "id" serial PRIMARY KEY,
@@ -49,6 +54,31 @@ CREATE TABLE "request" (
   "resolved_at" timestamp,
   "label" text
 );
+
+WITH stackcoin_reserve_system_user AS (
+  INSERT INTO "user"
+    (
+      created_at,
+      type,
+      username,
+      avatar_url,
+      balance,
+      last_given_dole,
+      banned
+    )
+  VALUES
+    (
+      now() at time zone 'utc',
+      'Internal',
+      'StackCoin Reserve System',
+      'https://stackcoin.world/assets/default_avatar.png',
+      0,
+      null,
+      false
+    )
+  RETURNING id, username
+)
+INSERT INTO "internal_user" SELECT id, username AS identifier FROM stackcoin_reserve_system_user;
 
 COMMIT;
 
@@ -65,6 +95,8 @@ DROP TYPE request_status;
 DROP TABLE "bot_user";
 
 DROP TABLE "discord_user";
+
+DROP TABLE "internal_user";
 
 DROP TABLE "user";
 

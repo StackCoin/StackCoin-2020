@@ -1,7 +1,7 @@
 require "humanize_time"
 require "../result"
 
-class StackCoin::Bank
+class StackCoin::Core::Bank
   class Result < StackCoin::Result
     class SuccessfulTransaction < Success
       property transaction : Models::Transaction
@@ -9,9 +9,6 @@ class StackCoin::Bank
       def initialize(message, @transaction)
         super(message)
       end
-    end
-
-    class PrematureDole < Failure
     end
 
     class TransferSelf < Failure
@@ -27,37 +24,14 @@ class StackCoin::Bank
     end
   end
 
-  DOLE_AMOUNT         =     10
   MAX_TRANSFER_AMOUNT = 100000
 
-  private def self.deposit(user : Models::User, amount : Int32)
+  def self.deposit(user : Models::User, amount : Int32)
     user.balance += amount
   end
 
-  private def self.withdraw(user : Models::User, amount : Int32)
+  def self.withdraw(user : Models::User, amount : Int32)
     user.balance -= amount
-  end
-
-  def self.dole(cnn : ::DB::Connection, user : Models::User)
-    now = Time.utc
-
-    if last_given_dole = user.last_given_dole
-      if last_given_dole.day == now.day
-        time_till_rollver = HumanizeTime.distance_of_time_in_words(now.at_end_of_day - now, now)
-        return Result::PrematureDole.new("Dole already received today, rollover in #{time_till_rollver}")
-      end
-    end
-
-    deposit(user, DOLE_AMOUNT)
-
-    user.last_given_dole = now
-
-    # TODO update database with new values
-
-    # TODO log transaction
-    # transaction = ...
-
-    # Result::SuccessfulTransaction.new("#{DOLE_AMOUNT} STK given, your balance is now #{user.balance} STK", transaction)
   end
 
   def self.transfer(cnn : ::DB::Connection, from : Models::User, to : Models::User, amount : Int32, label : String? = nil)
