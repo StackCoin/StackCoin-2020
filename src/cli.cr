@@ -41,6 +41,12 @@ parser = OptionParser.parse do |parser|
     exit
   end
 
+  parser.on("-m", "--dump-models", "Dump all models to json") do
+    all_models = StackCoin::Models.all
+    puts all_models.to_json
+    exit
+  end
+
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit

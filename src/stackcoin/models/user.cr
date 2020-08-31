@@ -11,6 +11,7 @@ end
 class StackCoin::Models::User::Full < StackCoin::Models::User
   property id : Int32?
   property created_at : Time
+  @[::DB::Field(converter: StackCoin::Models::Converters::Database::Enum(StackCoin::Models::User::UserType).new)]
   property type : UserType
   property username : String
   property avatar_url : String
@@ -38,5 +39,11 @@ class StackCoin::Models::User::Full < StackCoin::Models::User
       args: [@created_at, @type, @username, @avatar_url, @balance, @last_given_dole, @banned],
       as: Int32
     )
+  end
+
+  def self.all(cnn)
+    self.from_rs(cnn.query(<<-SQL))
+      SELECT * FROM "user"
+      SQL
   end
 end

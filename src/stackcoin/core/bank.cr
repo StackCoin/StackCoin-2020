@@ -31,9 +31,11 @@ class StackCoin::Bank
   @@max_transfer_amount : Int32 = 100000
 
   private def deposit(cnn : DB::Connection, user : User, amount : Int32)
+    # TODO impl.
   end
 
   private def withdraw(cnn : DB::Connection, user : User, amount : Int32)
+    # TODO impl.
   end
 
   def dole(cnn : DB::Connection, user : User)

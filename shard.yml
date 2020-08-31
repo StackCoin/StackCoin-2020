@@ -8,6 +8,9 @@ targets:
   stackcoin:
     main: src/cli.cr
 
+  micrate:
+    main: tools/micrate.cr
+
 dependencies:
   pg:
     github: will/crystal-pg

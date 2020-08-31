@@ -1,6 +1,7 @@
 .env
 
 micrate
+bin/
 
 lib/
 docs/
