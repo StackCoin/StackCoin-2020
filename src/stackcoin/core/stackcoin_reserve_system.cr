@@ -7,16 +7,28 @@ class StackCoin::Core::StackCoinReserveSystem
     end
   end
 
-  DOLE_AMOUNT = 10
+  DOLE_AMOUNT                              = 10
+  STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER = "StackCoin Reserve System"
 
-  @@stackcoin_reserve_system_user : Models::User::Full? = nil
+  @@stackcoin_reserve_system_user : Models::InternalUser? = nil
 
-  def self.stackcoin_reserve_system_user (cnn)
+  def self.stackcoin_reserve_system_user(cnn)
     if stackcoin_reserve_system_user = @@stackcoin_reserve_system_user
       return stackcoin_reserve_system_user
     else
-      raise "request da user"
+      stackcoin_reserve_system_user = Models::InternalUser.from_identifier(cnn, STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER)
+      @@stackcoin_reserve_system_user = stackcoin_reserve_system_user
+      return stackcoin_reserve_system_user
     end
+  end
+
+  def self.pump(cnn : ::DB::Connection, amount : Int32)
+    # TODO log pump
+
+    user = stackcoin_reserve_system_user(cnn)
+    Bank.deposit(user, amount)
+
+    # TODO update values
   end
 
   def self.dole(cnn : ::DB::Connection, user : Models::User)
@@ -28,8 +40,6 @@ class StackCoin::Core::StackCoinReserveSystem
         return Result::PrematureDole.new("Dole already received today, rollover in #{time_till_rollver}")
       end
     end
-
-    Bank.deposit(user, DOLE_AMOUNT)
 
     from = stackcoin_reserve_system_user(cnn)
     result = Bank.transfer(cnn, from: from, to: user, amount: DOLE_AMOUNT)
@@ -43,6 +53,8 @@ class StackCoin::Core::StackCoinReserveSystem
     end
 
     # TODO update values
+    #from.update("balance")
+    #user.update("last_given_dole", "balance")
 
     result
   end

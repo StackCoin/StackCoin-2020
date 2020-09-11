@@ -1,3 +1,6 @@
+require "pg"
+require "micrate"
+
 module StackCoin
   DB = PG.connect(DATABASE_CONNECTION_STRING)
 

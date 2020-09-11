@@ -64,6 +64,9 @@ class StackCoin::Core::Bank
     withdraw(from, amount)
     deposit(to, amount)
 
+    from.update_balance
+    to.update_balance
+
     # TODO update database with new values
 
     transaction = Models::Transaction::Full.new(
