@@ -9,6 +9,10 @@ class StackCoin::Bot::Commands
     end
 
     def invoke(message, parsed)
+      unless parsed.arguments.size == 2
+        raise Parser::Error.new("Expected two arguments, got #{parsed.arguments.size}")
+      end
+
       user = parsed.arguments[0].to_user
       amount = parsed.arguments[1].to_i
 

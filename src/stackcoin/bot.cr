@@ -53,7 +53,7 @@ class StackCoin::Bot
         next if message.guild_id.is_a?(Nil) || message.author.bot
         handle_message(message)
       rescue ex : Parser::Error
-        send_message(message, "Invalid argument: #{ex.message}")
+        send_message(message, "_Invalid argument(s)_: #{ex.message}")
       rescue ex
         # TODO error logging
         # Log.error { "Exception while invoking discord command: #{ex.inspect_with_backtrace}" }
@@ -98,14 +98,21 @@ class StackCoin::Bot
 
     if @@lookup.has_key?(parsed.command)
       command = @@lookup[parsed.command]
-      command.invoke(message, parsed)
+      begin
+        command.invoke(message, parsed)
+      rescue ex : Parser::Error
+        send_message(message, <<-MESSAGE)
+          _Invalid argument(s)_: #{ex.message}
+          _Usage_: `#{PREFIX}#{command.trigger} #{command.usage}`
+          MESSAGE
+      end
     else
       potential = Levenshtein.find(parsed.command, @@lookup.keys)
       if potential
         postfix = ", did you mean `#{potential}`?"
       end
 
-      send_message(message, "Unknown command: `#{parsed.command}`#{postfix}")
+      send_message(message, "_Unknown command_: `#{parsed.command}`#{postfix}")
     end
   end
 

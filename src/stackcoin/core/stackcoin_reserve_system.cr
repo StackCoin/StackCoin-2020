@@ -10,14 +10,13 @@ class StackCoin::Core::StackCoinReserveSystem
   DOLE_AMOUNT                              = 10
   STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER = "StackCoin Reserve System"
 
-  @@stackcoin_reserve_system_user : Models::InternalUser? = nil
+  @@stackcoin_reserve_system_user_id : Int64? = nil
 
   def self.stackcoin_reserve_system_user(cnn)
     if stackcoin_reserve_system_user = @@stackcoin_reserve_system_user
       return stackcoin_reserve_system_user
     else
-      stackcoin_reserve_system_user = Models::InternalUser.from_identifier(cnn, STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER)
-      @@stackcoin_reserve_system_user = stackcoin_reserve_system_user
+      raise "todo select da user"
       return stackcoin_reserve_system_user
     end
   end
@@ -25,31 +24,36 @@ class StackCoin::Core::StackCoinReserveSystem
   def self.pump(cnn : ::DB::Connection, amount : Int32)
     # TODO log pump
 
-    user = stackcoin_reserve_system_user(cnn)
-    Bank.deposit(user, amount)
+    #user = stackcoin_reserve_system_user(cnn)
+    #Bank.deposit(user, amount)
 
     # TODO update values
   end
 
-  def self.dole(cnn : ::DB::Connection, user : Models::User)
+  def self.dole(cnn : ::DB::Connection, to_user_id : Int64)
     now = Time.utc
 
-    if last_given_dole = user.last_given_dole
+    to_user_last_given_dole = cnn.query_one(<<-SQL, from_user_id, as: Time)
+      SELECT last_given_dole FROM user WHERE id = $1
+      SQL
+
+    if last_given_dole = to_user_last_given_dole
       if last_given_dole.day == now.day
         time_till_rollver = HumanizeTime.distance_of_time_in_words(now.at_end_of_day - now, now)
         return Result::PrematureDole.new("Dole already received today, rollover in #{time_till_rollver}")
       end
     end
 
-    from = stackcoin_reserve_system_user(cnn)
-    result = Bank.transfer(cnn, from: from, to: user, amount: DOLE_AMOUNT)
+    # TODO
+    #from = stackcoin_reserve_system_user(cnn)
+    #result = Bank.transfer(cnn, from: from, to: user, amount: DOLE_AMOUNT)
 
     # if result is success
 
     if true
-      user.last_given_dole = now
+      # TODO user.last_given_dole = now
     else
-      # no dole??? unheard of
+      # TODO no dole??? unheard of
     end
 
     # TODO update values
