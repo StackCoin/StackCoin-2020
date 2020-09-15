@@ -1,8 +1,9 @@
 class StackCoin::Bot::Commands
-  class Send < Command
+  class Pump < Command
     getter trigger = "pump"
-    getter usage = "<#amount> <''>"
-    getter desc = "Send your STK to others"
+    getter aliases = [] of String
+    getter usage = "<#amount> <\"label\">"
+    getter desc = "Pump the Stackcoin Reserve System"
 
     def initialize
     end

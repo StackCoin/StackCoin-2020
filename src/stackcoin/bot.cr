@@ -56,6 +56,8 @@ require "./bot/commands/*"
 class StackCoin::Bot
   TOKEN     = "Bot #{ENV["STACKCOIN_DISCORD_TOKEN"]}"
   CLIENT_ID = ENV["STACKCOIN_DISCORD_CLIENT_ID"].to_u64
+  OWNER_SNOWFLAKE = Discord::Snowflake.new(ENV["STACKCOIN_DISCORD_OWNER_ID"].to_u64)
+
   PREFIX    = ENV["STACKCOIN_DISCORD_PREFIX"]
 
   INSTANCE = new
@@ -98,8 +100,10 @@ class StackCoin::Bot
 
   def load_commands
     all_commands = [
+      Commands::Dole.new,
       Commands::Leaderboard.new,
       Commands::Send.new,
+      Commands::Pump.new,
       Commands::Open.new,
     ]
 

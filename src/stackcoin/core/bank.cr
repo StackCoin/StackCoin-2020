@@ -70,20 +70,20 @@ class StackCoin::Core::Bank
     end
 
     # TODO widthdraw / deposit
-    #withdraw(from, amount)
-    #deposit(to, amount)
+    # withdraw(from, amount)
+    # deposit(to, amount)
 
     # TODO update database with new values
 
     # TODO create transaction
-    #transaction = Models::Transaction::Full.new(
+    # transaction = Models::Transaction::Full.new(
     #  from_id: from_id,
     #  from_new_balance: from.balance,
     #  to_id: to_id,
     #  to_new_balance: to.balance,
     #  label: label,
-    #)
-    #transaction.insert(cnn)
+    # )
+    # transaction.insert(cnn)
 
     Result::SuccessfulTransaction.new("Transfer sucessful")
   end
@@ -95,6 +95,10 @@ class StackCoin::Core::Bank
     balance = 0
     admin = false
     banned = false
+
+    if discord_snowflake == Bot::OWNER_SNOWFLAKE
+      admin = true
+    end
 
     user_id = cnn.query_one(<<-SQL, created_at, username, avatar_url, balance, admin, banned, as: Int32)
       INSERT INTO "user" (
