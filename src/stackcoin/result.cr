@@ -2,7 +2,7 @@ class StackCoin::Result
   class Base
     include JSON::Serializable
 
-    property message : String
+    getter message : String
 
     def initialize(@message)
     end
@@ -13,18 +13,28 @@ class StackCoin::Result
   end
 
   class Success < Base
-    property success : String
+    getter success : String
 
     def initialize(@message)
       @success = name
     end
+
+    def initialize(tx, @message)
+      @success = name
+      tx.commit
+    end
   end
 
   class Failure < Base
-    property failure : String
+    getter failure : String
 
     def initialize(@message)
       @failure = name
+    end
+
+    def initialize(tx, @message)
+      @failure = name
+      tx.rollback
     end
   end
 end

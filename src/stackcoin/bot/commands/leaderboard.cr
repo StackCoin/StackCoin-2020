@@ -3,7 +3,7 @@ class StackCoin::Bot::Commands
     getter trigger = "leaderboard"
     getter aliases = ["scoreboard"]
     getter usage = "<?#page=1>"
-    getter desc = "List of accounts, ranked by balance"
+    getter desc = "List of users, ranked by balance"
 
     def initialize
     end

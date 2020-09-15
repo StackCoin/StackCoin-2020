@@ -67,11 +67,11 @@ class StackCoin::Bot::Parser
       Discord::Mention.parse(@raw).first?
     end
 
-    def to_user
-      to_user? || raise Error.new(%(`#{@raw}` is not a valid user mention))
+    def to_user_mention
+      to_user_mention? || raise Error.new(%(`#{@raw}` is not a valid user mention))
     end
 
-    def to_user?
+    def to_user_mention?
       to_mention?.as?(Discord::Mention::User)
     end
 

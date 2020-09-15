@@ -5,8 +5,8 @@ class StackCoin::Bot::Commands
     getter usage = "<?command>"
     getter desc = "Descriptions and usage of every StackCoin command"
 
-    property root_help = Discord::Embed.new
-    property sub_help = {} of String => Discord::Embed
+    getter root_help = Discord::Embed.new
+    getter sub_help = {} of String => Discord::Embed
 
     def initialize(all_commands)
       all_fields = [] of Discord::EmbedField
@@ -38,7 +38,7 @@ class StackCoin::Bot::Commands
         command = parsed.arguments[0].to_s
 
         if @sub_help.has_key? command
-          send_embed(message, @sub_help[command])
+          # TODO send_embed(message, @sub_help[command])
         else
           potential = Levenshtein.find(command, @sub_help.keys)
           if potential
@@ -48,7 +48,7 @@ class StackCoin::Bot::Commands
           send_message(message, "Unknown help section: #{command}#{postfix}")
         end
       else
-        send_message(message, @root_help)
+        # TODO send_embed(message, @root_help)
       end
     end
   end

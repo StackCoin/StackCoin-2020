@@ -1,12 +1,9 @@
 -- +micrate Up
 BEGIN;
 
-CREATE TYPE user_type AS ENUM ('Internal', 'Bot', 'Discord');
-
 CREATE TABLE "user" (
   "id" serial PRIMARY KEY,
   "created_at" timestamp without time zone not null,
-  "type" user_type not null,
   "username" text not null,
   "avatar_url" text not null,
   "balance" integer not null CHECK ("balance" >= 0),
@@ -70,7 +67,6 @@ WITH stackcoin_reserve_system_user AS (
   INSERT INTO "user"
     (
       created_at,
-      type,
       username,
       avatar_url,
       balance,
@@ -81,7 +77,6 @@ WITH stackcoin_reserve_system_user AS (
   VALUES
     (
       now() at time zone 'utc',
-      'Internal',
       'StackCoin Reserve System',
       'https://stackcoin.world/assets/default_avatar.png',
       0,
@@ -96,7 +91,6 @@ INSERT INTO "internal_user" SELECT id, username AS identifier FROM stackcoin_res
 COMMIT;
 
 -- +micrate Down
-
 BEGIN;
 
 DROP TABLE "request";
@@ -114,7 +108,5 @@ DROP TABLE "discord_user";
 DROP TABLE "internal_user";
 
 DROP TABLE "user";
-
-DROP TYPE user_type;
 
 COMMIT;

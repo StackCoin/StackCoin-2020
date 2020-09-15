@@ -10,7 +10,7 @@ class StackCoin::Core::StackCoinReserveSystem
   DOLE_AMOUNT                              = 10
   STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER = "StackCoin Reserve System"
 
-  @@stackcoin_reserve_system_user_id : Int64? = nil
+  @@stackcoin_reserve_system_user_id : Int32? = nil
 
   def self.stackcoin_reserve_system_user(cnn)
     if stackcoin_reserve_system_user = @@stackcoin_reserve_system_user
@@ -30,7 +30,7 @@ class StackCoin::Core::StackCoinReserveSystem
     # TODO update values
   end
 
-  def self.dole(cnn : ::DB::Connection, to_user_id : Int64)
+  def self.dole(cnn : ::DB::Connection, to_user_id : Int32)
     now = Time.utc
 
     to_user_last_given_dole = cnn.query_one(<<-SQL, from_user_id, as: Time)
