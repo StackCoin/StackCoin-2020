@@ -18,10 +18,9 @@ class StackCoin::Bot::Commands
 
       result = nil
       DB.transaction do |tx|
-        cnn = tx.connection
-        from_id = user_id_from_snowflake(cnn, message.author.id)
-        to_id = user_id_from_snowflake(cnn, Discord::Snowflake.new(user_mention.id))
-        result = Core::Bank.transfer(cnn, from_id, to_id, amount)
+        from_id = user_id_from_snowflake(tx, message.author.id)
+        to_id = user_id_from_snowflake(tx, Discord::Snowflake.new(user_mention.id))
+        result = Core::Bank.transfer(tx, from_id, to_id, amount)
       end
 
       if result.is_a?(Core::Bank::Result::SuccessfulTransaction)

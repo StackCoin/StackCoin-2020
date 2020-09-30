@@ -16,7 +16,7 @@ class Actor
   end
 
   JACK = new(
-    user_snowflake: Discord::Snowflake.new(178958252820791296),
+    user_snowflake: StackCoin::Bot::OWNER_SNOWFLAKE,
     guild_snowflake: CSBOIS_GUILD_SNOWFLAKE,
     username: "<i>jack arthur null</i>#7539",
     avatar_url: "https://cdn.discordapp.com/avatars/178958252820791296/30bfbbc587afd1e0eeaf85811df2e743.png?size=256"

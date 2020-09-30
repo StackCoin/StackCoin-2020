@@ -9,7 +9,7 @@ describe "StackCoin::Bot::Commands::Dole" do
   it "creates new account but fails due to nothing in the stackcoin reserve system" do
     dole = StackCoin::Bot::Commands::Dole.new
 
-    rollback_once_finished do
+    rollback_once_finished do |tx|
       result = Actor::STEVE.say("s!dole", dole)
       # result.should be_a(StackCoin::Core::Bank::Result::InsufficientFunds)
     end

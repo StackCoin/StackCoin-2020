@@ -19,8 +19,7 @@ class MockBot
 end
 
 class StackCoin::Bot
-  OWNER_SNOWFLAKE = Discord::Snowflake.new(0)
-
+  OWNER_SNOWFLAKE = Discord::Snowflake.new(178958252820791296)
   INSTANCE = MockBot.new
 end
 
@@ -57,6 +56,8 @@ class WrappedDB
   INNER = PG.connect(DATABASE_CONNECTION_STRING)
   delegate exec, to: INNER
   delegate query_all, to: INNER
+  delegate query_one, to: INNER
+  delegate scalar, to: INNER
 
   property existing_tx : DB::Transaction?
 
@@ -81,7 +82,7 @@ StackCoin::DB = WrappedDB.new
 
 def rollback_once_finished
   StackCoin::DB.transaction do |tx|
-    yield
+    yield tx
     tx.rollback
   end
 end

@@ -4,17 +4,25 @@ require "../result"
 class StackCoin::Core::Bank
   class Result < StackCoin::Result
     class SuccessfulTransaction < Success
+      getter transaction_id : Int32
+
+      def initialize(tx, message, @transaction_id)
+        super(tx, message)
+      end
     end
 
     class NewUserAccount < Success
       getter new_user_id : Int32
 
-      def initialize(message, @new_user_id)
-        super(message)
+      def initialize(tx, message, @new_user_id)
+        super(tx, message)
       end
     end
 
     class NoSuchUserAccount < Failure
+    end
+
+    class PreExistingUserAccount < Failure
     end
 
     class TransferSelf < Failure
@@ -32,26 +40,28 @@ class StackCoin::Core::Bank
 
   MAX_TRANSFER_AMOUNT = 100000
 
-  def self.transfer(cnn : ::DB::Connection, from_user_id : Int32?, to_user_id : Int32?, amount : Int32, label : String? = nil)
+  def self.transfer(tx : ::DB::Transaction, from_user_id : Int32?, to_user_id : Int32?, amount : Int32, label : String? = nil)
     unless from_user_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new("You don't have an user account yet")
+      return Result::NoSuchUserAccount.new(tx, "You don't have an user account yet")
     end
 
     unless to_user_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new("Recieving user doesn't have an user account")
+      return Result::NoSuchUserAccount.new(tx, "Recieving user doesn't have an user account")
     end
 
     if from_user_id == to_user_id
-      return Result::TransferSelf.new("Can't transfer money to self")
+      return Result::TransferSelf.new(tx, "Can't transfer money to self")
     end
 
     unless amount > 0
-      return Result::InvalidAmount.new("Amount must be greater than zero")
+      return Result::InvalidAmount.new(tx, "Amount must be greater than zero")
     end
 
     if amount > MAX_TRANSFER_AMOUNT
-      return Result::InvalidAmount.new("Amount can't be greater than #{MAX_TRANSFER_AMOUNT}")
+      return Result::InvalidAmount.new(tx, "Amount can't be greater than #{MAX_TRANSFER_AMOUNT}")
     end
+
+    cnn = tx.connection
 
     from_balance, from_banned = cnn.query_one(<<-SQL, from_user_id, as: {Int32, Bool})
       SELECT balance, banned FROM "user" WHERE id = $1
@@ -62,33 +72,42 @@ class StackCoin::Core::Bank
       SQL
 
     if from_banned || to_banned
-      return Result::BannedUser.new("Banned user mentioned in transfer")
+      return Result::BannedUser.new(tx, "Banned user mentioned in transfer")
     end
 
     if from_balance - amount < 0
-      return Result::InsufficientFunds.new("Insufficient funds")
+      return Result::InsufficientFunds.new(tx, "Insufficient funds")
     end
 
-    # TODO widthdraw / deposit
-    # withdraw(from, amount)
-    # deposit(to, amount)
+    from_new_balance = from_balance - amount
+    cnn.exec(<<-SQL, from_new_balance, from_user_id)
+      UPDATE "user" SET balance = $1 WHERE user_id = $2
+      SQL
 
-    # TODO update database with new values
+    to_new_balance = to_balance + amount
+    cnn.exec(<<-SQL, to_new_balance, to_user_id)
+      UPDATE "user" SET balance = $1 WHERE user_id = $2
+      SQL
 
-    # TODO create transaction
-    # transaction = Models::Transaction::Full.new(
-    #  from_id: from_id,
-    #  from_new_balance: from.balance,
-    #  to_id: to_id,
-    #  to_new_balance: to.balance,
-    #  label: label,
-    # )
-    # transaction.insert(cnn)
+    now = Time.utc
+    transaction_id = cnn.query_one(<<-SQL, from_id, from_new_balance, to_id, to_new_balance, now, as: Int32)
+      INSERT INTO "transaction" (
+        from_id,
+        from_new_balance,
+        to_id,
+        to_new_balance,
+        time,
+      ) VALUES (
+        $1, $2, $3, $4, $5
+      ) RETURNING id
+      SQL
 
-    Result::SuccessfulTransaction.new("Transfer sucessful")
+
+
+    Result::SuccessfulTransaction.new(tx, "Transfer sucessful", transaction_id: transaction_id)
   end
 
-  def self.open(cnn : ::DB::Connection, discord_snowflake : Discord::Snowflake, username : String, avatar_url : String)
+  def self.open(tx : ::DB::Transaction, discord_snowflake : Discord::Snowflake, username : String, avatar_url : String)
     now = Time.utc
 
     created_at = now
@@ -100,15 +119,15 @@ class StackCoin::Core::Bank
       admin = true
     end
 
-    preexisting_id = cnn.query_one?(<<-SQL, snowflake.to_u64, as: Int32)
+    cnn = tx.connection
+
+    preexisting_id = cnn.query_one?(<<-SQL, discord_snowflake.to_u64, as: Int32)
       SELECT id FROM discord_user WHERE snowflake = $1
       SQL
 
     if preexisting_id
-      return Result::PreExistingUserAccount.new(tx, client, message, "You already have an user account associated with your Discord account")
+      return Result::PreExistingUserAccount.new(tx, "You already have an user account associated with your Discord account")
     end
-
-    # TODO ensure discord id isn't associated with an account
 
     user_id = cnn.query_one(<<-SQL, created_at, username, avatar_url, balance, admin, banned, as: Int32)
       INSERT INTO "user" (
@@ -131,6 +150,6 @@ class StackCoin::Core::Bank
       )
       SQL
 
-    return Result::NewUserAccount.new("User account created", user_id)
+    return Result::NewUserAccount.new(tx, "User account created", user_id)
   end
 end
