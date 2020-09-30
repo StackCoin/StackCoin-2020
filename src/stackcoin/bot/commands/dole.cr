@@ -19,15 +19,11 @@ class StackCoin::Bot::Commands
 
         potential_id = user_id_from_snowflake(cnn, author.id)
 
-        unless potential_id
+        if !potential_id
           create_result = Core::Bank.open(cnn, author.id, author.username, author.avatar_url)
-
-          p create_result
         end
 
         dole_result = Core::StackCoinReserveSystem.dole(cnn, potential_id)
-
-        p dole_result
       end
     end
   end

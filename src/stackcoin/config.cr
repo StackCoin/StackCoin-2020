@@ -1,5 +1,5 @@
 module StackCoin
-  EPOCH                           = Time.unix(1574467200)
+  EPOCH = Time.unix(1574467200)
 
   POSTGRES_DB                     = ENV["POSTGRES_DB"]
   DATABASE_CONNECTION_STRING_BASE = ENV["STACKCOIN_DATABASE_CONNECTION_STRING_BASE"]

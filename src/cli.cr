@@ -23,8 +23,17 @@ parser = OptionParser.parse do |parser|
   parser.on("-n", "--nuke-database", "Nuke the database, and then run migrations") do
     StackCoin::DB.close
     db = PG.connect(StackCoin::DATABASE_CONNECTION_STRING_BASE)
+
+    db.exec(<<-SQL)
+      SELECT pg_terminate_backend(pg_stat_activity.pid)
+      FROM pg_stat_activity
+      WHERE datname = '#{StackCoin::POSTGRES_DB}'
+        AND pid <> pg_backend_pid();
+    SQL
+
     db.exec("DROP DATABASE #{StackCoin::POSTGRES_DB}")
     db.exec("CREATE DATABASE #{StackCoin::POSTGRES_DB}")
+
     StackCoin.run_migrations
     exit
   end

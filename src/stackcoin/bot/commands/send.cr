@@ -30,9 +30,10 @@ class StackCoin::Bot::Commands
       elsif result.is_a?(Result::Base)
         send_message(message, result.message)
       else
-        p result
         raise Exceptions::UnexpectedState.new("Result was an unexpected value: #{result}")
       end
+
+      result
     end
   end
 end

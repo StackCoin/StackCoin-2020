@@ -30,6 +30,8 @@ class StackCoin::Bot::Commands
       else
         raise Exceptions::UnexpectedState.new("Result was an unexpected value: #{result}")
       end
+
+      result
     end
   end
 end

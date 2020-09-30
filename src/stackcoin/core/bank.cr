@@ -100,6 +100,16 @@ class StackCoin::Core::Bank
       admin = true
     end
 
+    preexisting_id = cnn.query_one?(<<-SQL, snowflake.to_u64, as: Int32)
+      SELECT id FROM discord_user WHERE snowflake = $1
+      SQL
+
+    if preexisting_id
+      return Result::PreExistingUserAccount.new(tx, client, message, "You already have an user account associated with your Discord account")
+    end
+
+    # TODO ensure discord id isn't associated with an account
+
     user_id = cnn.query_one(<<-SQL, created_at, username, avatar_url, balance, admin, banned, as: Int32)
       INSERT INTO "user" (
         created_at,
@@ -115,7 +125,7 @@ class StackCoin::Core::Bank
 
     cnn.exec(<<-SQL, user_id, now, discord_snowflake)
       INSERT INTO "discord_user" (
-        id, last_updated ,snowflake
+        id, last_updated, snowflake
       ) VALUES (
         $1, $2, $3
       )
