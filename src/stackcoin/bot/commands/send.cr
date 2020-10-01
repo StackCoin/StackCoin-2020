@@ -22,14 +22,13 @@ class StackCoin::Bot::Commands
         to_id = user_id_from_snowflake(tx, Discord::Snowflake.new(user_mention.id))
         result = Core::Bank.transfer(tx, from_id, to_id, amount)
       end
+      result = result.as(Result::Base)
 
       if result.is_a?(Core::Bank::Result::SuccessfulTransaction)
         # TODO embed and such
         send_message(message, result.message)
-      elsif result.is_a?(Result::Base)
-        send_message(message, result.message)
       else
-        raise Exceptions::UnexpectedState.new("Result was an unexpected value: #{result}")
+        send_message(message, result.message)
       end
 
       result

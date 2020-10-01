@@ -29,7 +29,6 @@ JKE_GUILD_SNOWFLAKE    = Discord::Snowflake.new(72070136256794624)
 require "./stubs"
 require "./fixtures"
 require "../src/stackcoin/result"
-require "../src/stackcoin/exceptions"
 require "../src/stackcoin/bot/parser"
 
 PREFIX = "s!"

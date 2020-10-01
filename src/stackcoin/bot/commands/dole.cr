@@ -16,17 +16,15 @@ class StackCoin::Bot::Commands
       DB.transaction do |tx|
         author = message.author
 
-        potential_id = user_id_from_snowflake(cnn, author.id)
+        potential_id = user_id_from_snowflake(tx, author.id)
 
         if !potential_id
-          create_result = Core::Bank.open(cnn, author.id, author.username, author.avatar_url)
-
-          # TODO handle create result
+          create_result = Core::Bank.open(tx, author.id, author.username, author.avatar_url)
+          send_message(message, create_result.message)
         end
 
-        result = Core::StackCoinReserveSystem.dole(cnn, potential_id)
-
-        # TODO merge results into one message
+        result = Core::StackCoinReserveSystem.dole(tx, potential_id)
+        send_message(message, result.message)
       end
 
       result
