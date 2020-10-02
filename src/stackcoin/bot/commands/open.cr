@@ -7,7 +7,7 @@ class StackCoin::Bot::Commands
     def initialize
     end
 
-    def invoke(message, parsed)
+    def invoke(message, parsed, tx = nil)
       author = message.author
       result = nil
       DB.transaction do |tx|

@@ -12,22 +12,28 @@ class StackCoin::Bot::Commands
         raise Parser::Error.new("Expected zero arguments, got #{parsed.arguments.size}")
       end
 
-      result = nil
+      results = [] of Result::Base
+
       DB.transaction do |tx|
         author = message.author
 
         potential_id = user_id_from_snowflake(tx, author.id)
 
         if !potential_id
-          create_result = Core::Bank.open(tx, author.id, author.username, author.avatar_url)
-          send_message(message, create_result.message)
+          result = Core::Bank.open(tx, author.id, author.username, author.avatar_url)
+          results << result
+
+          if result.is_a?(Core::Bank::Result::NewUserAccount)
+            potential_id = result.new_user_id
+          else
+            next
+          end
         end
 
-        result = Core::StackCoinReserveSystem.dole(tx, potential_id)
-        send_message(message, result.message)
+        results << Core::StackCoinReserveSystem.dole(tx, potential_id)
       end
 
-      result
+      results
     end
   end
 end

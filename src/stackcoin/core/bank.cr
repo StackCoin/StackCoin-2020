@@ -5,8 +5,10 @@ class StackCoin::Core::Bank
   class Result < StackCoin::Result
     class SuccessfulTransaction < Success
       getter transaction_id : Int32
+      getter from_user_balance : Int32
+      getter to_user_balance : Int32
 
-      def initialize(tx, message, @transaction_id)
+      def initialize(tx, message, @transaction_id, @from_user_balance, @to_user_balance)
         super(tx, message)
       end
     end
@@ -81,12 +83,12 @@ class StackCoin::Core::Bank
 
     from_new_balance = from_balance - amount
     cnn.exec(<<-SQL, from_new_balance, from_user_id)
-      UPDATE "user" SET balance = $1 WHERE user_id = $2
+      UPDATE "user" SET balance = $1 WHERE id = $2
       SQL
 
     to_new_balance = to_balance + amount
     cnn.exec(<<-SQL, to_new_balance, to_user_id)
-      UPDATE "user" SET balance = $1 WHERE user_id = $2
+      UPDATE "user" SET balance = $1 WHERE id = $2
       SQL
 
     now = Time.utc
@@ -102,7 +104,13 @@ class StackCoin::Core::Bank
       ) RETURNING id
       SQL
 
-    Result::SuccessfulTransaction.new(tx, "Transfer sucessful", transaction_id: transaction_id)
+    Result::SuccessfulTransaction.new(
+      tx,
+      "Transfer sucessful",
+      transaction_id: transaction_id,
+      from_user_balance: from_new_balance,
+      to_user_balance: to_new_balance,
+    )
   end
 
   def self.open(tx : ::DB::Transaction, discord_snowflake : Discord::Snowflake, username : String, avatar_url : String)

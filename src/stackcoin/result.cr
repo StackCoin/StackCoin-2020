@@ -21,7 +21,6 @@ class StackCoin::Result
 
     def initialize(tx, @message)
       @success = name
-      tx.commit
     end
   end
 

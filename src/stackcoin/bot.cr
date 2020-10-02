@@ -36,12 +36,12 @@ class StackCoin::Bot
         next if message.guild_id.is_a?(Nil) || message.author.bot
         handle_message(message)
       rescue ex : Parser::Error
-        send_message(message, "_Invalid argument(s)_: #{ex.message}")
+        send_message(message, "Invalid argument(s): #{ex.message}")
       rescue ex
         # TODO error logging
         # Log.error { "Exception while invoking discord command: #{ex.inspect_with_backtrace}" }
         send_message(message, <<-MESSAGE)
-          `Error: #{ex.message}`
+          Error: `#{ex.message}`, ping <@#{OWNER_SNOWFLAKE}>
           ```
           #{ex.inspect_with_backtrace}
           ```
@@ -88,8 +88,8 @@ class StackCoin::Bot
         command.invoke(message, parsed)
       rescue ex : Parser::Error
         send_message(message, <<-MESSAGE)
-          _Invalid argument(s)_: #{ex.message}
-          _Usage_: `#{PREFIX}#{command.trigger} #{command.usage}`
+          Invalid argument(s): #{ex.message}
+          Usage: `#{PREFIX}#{command.trigger} #{command.usage}`
           MESSAGE
       end
     else
@@ -98,7 +98,7 @@ class StackCoin::Bot
         postfix = ", did you mean `#{potential}`?"
       end
 
-      send_message(message, "_Unknown command_: `#{parsed.command}`#{postfix}")
+      send_message(message, "Unknown command: `#{parsed.command}`#{postfix}")
     end
   end
 

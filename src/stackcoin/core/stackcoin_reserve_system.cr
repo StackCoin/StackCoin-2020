@@ -5,6 +5,15 @@ class StackCoin::Core::StackCoinReserveSystem
   class Result < StackCoin::Result
     class PrematureDole < Failure
     end
+
+    class NoSuchUserAccount < Failure
+    end
+
+    class EmptyReserves < Success
+    end
+
+    class GivenDole < Success
+    end
   end
 
   DOLE_AMOUNT                              = 10
@@ -28,12 +37,14 @@ class StackCoin::Core::StackCoinReserveSystem
     # TODO log pump
 
     user_id = stackcoin_reserve_system_user(tx)
-    Bank.deposit(tx, user_id, amount)
+    cnn.exec(<<-SQL, amount, user_id)
+      UPDATE "user" SET balance = balanace + $1 WHERE id = $2
+      SQL
   end
 
   def self.dole(tx : ::DB::Transaction, to_user_id : Int32?)
     unless to_user_id.is_a?(Int32)
-      return Core::Bank::Result::NoSuchUserAccount.new(tx, "You don't have an user account yet")
+      return Result::NoSuchUserAccount.new(tx, "You don't have an user account to deposit dole to yet")
     end
 
     now = Time.utc
@@ -53,14 +64,14 @@ class StackCoin::Core::StackCoinReserveSystem
     from_user_id = stackcoin_reserve_system_user(tx)
     result = Bank.transfer(tx, from_user_id, to_user_id, amount: DOLE_AMOUNT)
 
-    # if result is success
+    if result.is_a?(Core::Bank::Result::SuccessfulTransaction)
+      cnn.exec(<<-SQL, now, to_user_id)
+        UPDATE "user" SET last_given_dole = $1 WHERE id = $1
+        SQL
 
-    if true
-      # TODO user.last_given_dole = now
-    else
-      # TODO no dole??? unheard of
+      return Result::GivenDole.new(tx, "Dole given, your new balance is #{result.to_user_balance}")
     end
 
-    result
+    Result::EmptyReserves.new(tx, "The StackCoin Reserve System is empty, dole cannot be given")
   end
 end
