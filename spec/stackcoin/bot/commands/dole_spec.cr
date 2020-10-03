@@ -32,7 +32,13 @@ describe "StackCoin::Bot::Commands::Dole" do
 
       results = Actor::STEVE.say("s!dole", dole)
 
-      p results
+      results.size.should eq 2
+
+      results[0].should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
+      results[1].should be_a(StackCoin::Core::StackCoinReserveSystem::Result::GivenDole)
+
+      second_result = results[1].as(StackCoin::Core::StackCoinReserveSystem::Result::GivenDole)
+      second_result.to_user_balance.should eq StackCoin::Core::StackCoinReserveSystem::DOLE_AMOUNT
     end
   end
 end

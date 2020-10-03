@@ -16,13 +16,20 @@ class StackCoin::Core::StackCoinReserveSystem
     end
 
     class GivenDole < Success
+      getter transaction_id : Int32
+      getter stackcoin_reserve_system_user_balance : Int32
+      getter to_user_balance : Int32
+
+      def initialize(tx, message, @transaction_id, @stackcoin_reserve_system_user_balance, @to_user_balance)
+        super(tx, message)
+      end
     end
 
     class Pump < Success
       getter pump_id : Int32
-      getter stackcoin_reserve_system_user_new_balance : Int32
+      getter stackcoin_reserve_system_user_balance : Int32
 
-      def initialize(tx, message, @pump_id, @stackcoin_reserve_system_user_new_balance)
+      def initialize(tx, message, @pump_id, @stackcoin_reserve_system_user_balance)
         super(tx, message)
       end
     end
@@ -89,7 +96,7 @@ class StackCoin::Core::StackCoinReserveSystem
       tx,
       "Successfully pumped the StackCoin Reserve System with #{amount} STK",
       pump_id: pump_id,
-      stackcoin_reserve_system_user_new_balance: new_balance,
+      stackcoin_reserve_system_user_balance: new_balance,
     )
   end
 
@@ -120,7 +127,13 @@ class StackCoin::Core::StackCoinReserveSystem
         UPDATE "user" SET last_given_dole = $1 WHERE id = $2
         SQL
 
-      return Result::GivenDole.new(tx, "Dole given, your new balance is #{result.to_user_balance}")
+      return Result::GivenDole.new(
+        tx,
+        "Dole given, your new balance is #{result.to_user_balance}",
+        transaction_id: result.transaction_id,
+        stackcoin_reserve_system_user_balance: result.from_user_balance,
+        to_user_balance: result.to_user_balance,
+      )
     end
 
     Result::EmptyReserves.new(tx, "The StackCoin Reserve System is empty, dole cannot be given")
