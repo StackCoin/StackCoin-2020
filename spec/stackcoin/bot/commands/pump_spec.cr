@@ -15,7 +15,6 @@ describe "StackCoin::Bot::Commands::Pump" do
       Actor::JACK.say("s!open", open)
 
       amount = 100
-
       result = Actor::JACK.say("s!pump #{100} money", pump)
 
       result.should be_a(StackCoin::Core::StackCoinReserveSystem::Result::Pump)

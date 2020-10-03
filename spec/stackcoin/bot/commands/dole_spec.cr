@@ -31,6 +31,8 @@ describe "StackCoin::Bot::Commands::Dole" do
       Actor::JACK.say("s!pump 100 money", pump)
 
       results = Actor::STEVE.say("s!dole", dole)
+
+      p results
     end
   end
 end
