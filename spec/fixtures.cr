@@ -15,6 +15,10 @@ class Actor
     command.invoke(message, parsed)
   end
 
+  def mention
+    "<@#{user_snowflake}>"
+  end
+
   def id(tx)
     tx.connection.query_one(<<-SQL, @user_snowflake.to_s, as: Int32)
       SELECT "user".id
