@@ -12,11 +12,8 @@ describe "StackCoin::Bot::Commands::Open" do
       result.should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
       result = result.as(StackCoin::Core::Bank::Result::NewUserAccount)
 
-      id = Actor::NINT.id(tx)
-      admin = Actor::NINT.admin(tx)
-
-      id.should eq result.new_user_id
-      admin.should be_false
+      result.new_user_id.should eq Actor::NINT.id(tx)
+      Actor::NINT.admin(tx).should be_false
     end
   end
 
@@ -39,11 +36,8 @@ describe "StackCoin::Bot::Commands::Open" do
       result.should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
       result = result.as(StackCoin::Core::Bank::Result::NewUserAccount)
 
-      id = Actor::JACK.id(tx)
-      admin = Actor::JACK.admin(tx)
-
-      id.should eq result.new_user_id
-      admin.should be_true
+      result.new_user_id.should eq Actor::JACK.id(tx)
+      Actor::JACK.admin(tx).should be_true
     end
   end
 end

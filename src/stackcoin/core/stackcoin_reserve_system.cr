@@ -48,6 +48,7 @@ class StackCoin::Core::StackCoinReserveSystem
       stackcoin_reserve_system_user_id = cnn.query_one(<<-SQL, STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER, as: Int32)
         SELECT id FROM "internal_user" WHERE identifier = $1
         SQL
+      @@stackcoin_reserve_system_user_id = stackcoin_reserve_system_user_id
       return stackcoin_reserve_system_user_id
     end
   end

@@ -31,6 +31,8 @@ describe "StackCoin::Bot::Commands::Pump" do
 
       to_new_balance_label.should eq label
       to_new_balance.should eq amount
+      signee_id.should eq Actor::JACK.id(tx)
+      to_id.should eq StackCoin::Core::StackCoinReserveSystem.stackcoin_reserve_system_user_id
     end
   end
 
