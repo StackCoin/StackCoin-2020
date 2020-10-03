@@ -38,7 +38,7 @@ class StackCoin::Core::StackCoinReserveSystem
   DOLE_AMOUNT                              = 10
   STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER = "StackCoin Reserve System"
 
-  @@stackcoin_reserve_system_user_id : Int32? = nil
+  class_getter stackcoin_reserve_system_user_id : Int32? = nil
 
   def self.stackcoin_reserve_system_user(tx : ::DB::Transaction)
     if stackcoin_reserve_system_user_id = @@stackcoin_reserve_system_user_id

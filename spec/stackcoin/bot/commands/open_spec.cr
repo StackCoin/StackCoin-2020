@@ -4,15 +4,6 @@ require "../../../../src/stackcoin/core/bank"
 
 require "../../../../src/stackcoin/bot/commands/open"
 
-def id_and_admin_from_discord_snowflake(tx, snowflake)
-  tx.connection.query_one(<<-SQL, snowflake.to_s, as: {Int32, Bool})
-    SELECT "user".id, "user".admin
-      FROM "user"
-      JOIN "discord_user" ON "user".id = "discord_user".id
-      WHERE "discord_user".snowflake = $1
-    SQL
-end
-
 describe "StackCoin::Bot::Commands::Open" do
   it "creates new account that isn't an admin" do
     open = StackCoin::Bot::Commands::Open.new
@@ -21,7 +12,9 @@ describe "StackCoin::Bot::Commands::Open" do
       result.should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
       result = result.as(StackCoin::Core::Bank::Result::NewUserAccount)
 
-      id, admin = id_and_admin_from_discord_snowflake(tx, Actor::NINT.user_snowflake)
+      id = Actor::NINT.id(tx)
+      admin = Actor::NINT.admin(tx)
+
       id.should eq result.new_user_id
       admin.should be_false
     end
@@ -46,7 +39,9 @@ describe "StackCoin::Bot::Commands::Open" do
       result.should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
       result = result.as(StackCoin::Core::Bank::Result::NewUserAccount)
 
-      id, admin = id_and_admin_from_discord_snowflake(tx, Actor::JACK.user_snowflake)
+      id = Actor::JACK.id(tx)
+      admin = Actor::JACK.admin(tx)
+
       id.should eq result.new_user_id
       admin.should be_true
     end

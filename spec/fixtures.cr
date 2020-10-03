@@ -15,6 +15,24 @@ class Actor
     command.invoke(message, parsed)
   end
 
+  def id(tx)
+    tx.connection.query_one(<<-SQL, @user_snowflake.to_s, as: Int32)
+      SELECT "user".id
+        FROM "user"
+        JOIN "discord_user" ON "user".id = "discord_user".id
+        WHERE "discord_user".snowflake = $1
+      SQL
+  end
+
+  def admin(tx)
+    tx.connection.query_one(<<-SQL, @user_snowflake.to_s, as: Bool)
+      SELECT "user".admin
+        FROM "user"
+        JOIN "discord_user" ON "user".id = "discord_user".id
+        WHERE "discord_user".snowflake = $1
+      SQL
+  end
+
   JACK = new(
     user_snowflake: StackCoin::Bot::OWNER_SNOWFLAKE,
     guild_snowflake: CSBOIS_GUILD_SNOWFLAKE,

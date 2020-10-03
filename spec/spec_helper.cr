@@ -62,17 +62,23 @@ class WrappedDB
 
   def transaction
     if previous_tx = existing_tx
-      previous_tx.transaction do |tx|
-        @existing_tx = tx
-        yield tx
+      begin
+        previous_tx.transaction do |tx|
+          @existing_tx = tx
+          yield tx
+        end
+      ensure
+        @existing_tx = previous_tx
       end
-      @existing_tx = previous_tx
     else
-      INNER.transaction do |tx|
-        @existing_tx = tx
-        yield tx
+      begin
+        INNER.transaction do |tx|
+          @existing_tx = tx
+          yield tx
+        end
+      ensure
+        @existing_tx = nil
       end
-      @existing_tx = nil
     end
   end
 end

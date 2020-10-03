@@ -15,12 +15,22 @@ describe "StackCoin::Bot::Commands::Pump" do
       Actor::JACK.say("s!open", open)
 
       amount = 100
-      result = Actor::JACK.say("s!pump #{100} money", pump)
+      label = "money in the market fo today"
+
+      result = Actor::JACK.say("s!pump #{amount} \"#{label}\"", pump)
 
       result.should be_a(StackCoin::Core::StackCoinReserveSystem::Result::Pump)
       result = result.as(StackCoin::Core::StackCoinReserveSystem::Result::Pump)
 
       result.stackcoin_reserve_system_user_balance.should eq amount
+
+      cnn = tx.connection
+      signee_id, to_id, to_new_balance, to_new_balance_label = cnn.query_one(<<-SQL, result.pump_id, as: {Int32, Int32, Int32, String})
+        SELECT signee_id, to_id, to_new_balance, label FROM "pump" WHERE id = $1
+        SQL
+
+      to_new_balance_label.should eq label
+      to_new_balance.should eq amount
     end
   end
 
