@@ -33,7 +33,6 @@ class StackCoin::Result
 
     def initialize(tx, @message)
       @failure = name
-      tx.rollback
     end
   end
 end

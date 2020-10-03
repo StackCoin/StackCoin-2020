@@ -17,7 +17,6 @@ class StackCoin::Bot::Commands
       result = result.as(Result::Base)
 
       send_message(message, result.message)
-
       result
     end
   end

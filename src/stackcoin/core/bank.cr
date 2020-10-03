@@ -92,13 +92,14 @@ class StackCoin::Core::Bank
       SQL
 
     now = Time.utc
+
     transaction_id = cnn.query_one(<<-SQL, from_user_id, from_new_balance, to_user_id, to_new_balance, now, as: Int32)
       INSERT INTO "transaction" (
         from_id,
         from_new_balance,
         to_id,
         to_new_balance,
-        time,
+        time
       ) VALUES (
         $1, $2, $3, $4, $5
       ) RETURNING id

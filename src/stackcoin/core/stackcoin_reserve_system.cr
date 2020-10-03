@@ -9,10 +9,22 @@ class StackCoin::Core::StackCoinReserveSystem
     class NoSuchUserAccount < Failure
     end
 
-    class EmptyReserves < Success
+    class NotAuthorized < Failure
+    end
+
+    class EmptyReserves < Failure
     end
 
     class GivenDole < Success
+    end
+
+    class Pump < Success
+      getter pump_id : Int32
+      getter stackcoin_reserve_system_user_new_balance : Int32
+
+      def initialize(tx, message, @pump_id, @stackcoin_reserve_system_user_new_balance)
+        super(tx, message)
+      end
     end
   end
 
@@ -33,13 +45,52 @@ class StackCoin::Core::StackCoinReserveSystem
     end
   end
 
-  def self.pump(tx : ::DB::Transaction, amount : Int32)
-    # TODO log pump
+  def self.pump(tx : ::DB::Transaction, signee_id : Int32?, amount : Int32, label : String)
+    unless signee_id.is_a?(Int32)
+      return Result::NoSuchUserAccount.new(tx, "You don't have an user account to pump the StackCoin Reserve System with yet")
+    end
+
+    now = Time.utc
+    cnn = tx.connection
+
+    signee_is_admin = cnn.query_one(<<-SQL, signee_id, as: Bool)
+      SELECT admin FROM "user" WHERE id = $1
+      SQL
+
+    unless signee_is_admin
+      return Result::NotAuthorized.new(tx, "Not authorized to pump the StackCoin Reserve System")
+    end
 
     user_id = stackcoin_reserve_system_user(tx)
-    cnn.exec(<<-SQL, amount, user_id)
-      UPDATE "user" SET balance = balanace + $1 WHERE id = $2
+
+    current_balance = cnn.query_one(<<-SQL, user_id, as: Int32)
+      SELECT balance FROM "user" WHERE id = $1
       SQL
+
+    new_balance = current_balance + amount
+
+    cnn.exec(<<-SQL, new_balance, user_id)
+      UPDATE "user" SET balance = $1 WHERE id = $2
+      SQL
+
+    pump_id = cnn.query_one(<<-SQL, signee_id, user_id, new_balance, now, label, as: Int32)
+      INSERT INTO "pump" (
+        signee_id,
+        to_id,
+        to_new_balance,
+        time,
+        label
+      ) VALUES (
+        $1, $2, $3, $4, $5
+      ) RETURNING id
+      SQL
+
+    return Result::Pump.new(
+      tx,
+      "Successfully pumped the StackCoin Reserve System with #{amount} STK",
+      pump_id: pump_id,
+      stackcoin_reserve_system_user_new_balance: new_balance,
+    )
   end
 
   def self.dole(tx : ::DB::Transaction, to_user_id : Int32?)
@@ -66,7 +117,7 @@ class StackCoin::Core::StackCoinReserveSystem
 
     if result.is_a?(Core::Bank::Result::SuccessfulTransaction)
       cnn.exec(<<-SQL, now, to_user_id)
-        UPDATE "user" SET last_given_dole = $1 WHERE id = $1
+        UPDATE "user" SET last_given_dole = $1 WHERE id = $2
         SQL
 
       return Result::GivenDole.new(tx, "Dole given, your new balance is #{result.to_user_balance}")

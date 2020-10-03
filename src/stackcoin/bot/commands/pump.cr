@@ -9,7 +9,23 @@ class StackCoin::Bot::Commands
     end
 
     def invoke(message, parsed)
-      # TODO
+      unless parsed.arguments.size == 2
+        raise Parser::Error.new("Expected two arguments, got #{parsed.arguments.size}")
+      end
+
+      amount = parsed.arguments[0].to_i
+      label = parsed.arguments[1].to_s
+
+      author = message.author
+      result = nil
+      DB.transaction do |tx|
+        potential_id = user_id_from_snowflake(tx, author.id)
+        result = Core::StackCoinReserveSystem.pump(tx, potential_id, amount, label)
+      end
+      result = result.as(Result::Base)
+
+      send_message(message, result.message)
+      result
     end
   end
 end
