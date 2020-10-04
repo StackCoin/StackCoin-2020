@@ -39,26 +39,79 @@ describe "StackCoin::Bot::Commands::Pump" do
   end
 
   it "can't send money from one user to another if from user does not have an account" do
+    send = StackCoin::Bot::Commands::Send.new
+
+    rollback_once_finished do |tx|
+      result = Actor::YICK.say("s!send #{Actor::JACK.mention} 10", send)
+      result.should be_a(StackCoin::Core::Bank::Result::NoSuchUserAccount)
+    end
   end
 
   it "can't send money from one user to another if to user does not have an account" do
+    send = StackCoin::Bot::Commands::Send.new
+    open = StackCoin::Bot::Commands::Open.new
+
+    rollback_once_finished do |tx|
+      Actor::YICK.say("s!open", open)
+      result = Actor::YICK.say("s!send #{Actor::JACK.mention} 10", send)
+      result.should be_a(StackCoin::Core::Bank::Result::NoSuchUserAccount)
+    end
   end
 
   it "can't send money from self to self" do
+    send = StackCoin::Bot::Commands::Send.new
+    open = StackCoin::Bot::Commands::Open.new
+
+    rollback_once_finished do |tx|
+      Actor::MITCH.say("s!open", open)
+      result = Actor::MITCH.say("s!send #{Actor::MITCH.mention} 10", send)
+      result.should be_a(StackCoin::Core::Bank::Result::TransferSelf)
+    end
   end
 
   it "can't send less than zero" do
+    send = StackCoin::Bot::Commands::Send.new
+    open = StackCoin::Bot::Commands::Open.new
+
+    rollback_once_finished do |tx|
+      Actor::BIGMAN.say("s!open", open)
+      Actor::YICK.say("s!open", open)
+      result = Actor::BIGMAN.say("s!send #{Actor::YICK.mention} -420", send)
+      result.should be_a(StackCoin::Core::Bank::Result::InvalidAmount)
+    end
   end
 
   it "can't send more than the upwards limit" do
+    send = StackCoin::Bot::Commands::Send.new
+    open = StackCoin::Bot::Commands::Open.new
+
+    rollback_once_finished do |tx|
+      Actor::BIGMAN.say("s!open", open)
+      Actor::YICK.say("s!open", open)
+      result = Actor::BIGMAN.say("s!send #{Actor::YICK.mention} #{StackCoin::Core::Bank::MAX_TRANSFER_AMOUNT + 1}", send)
+      result.should be_a(StackCoin::Core::Bank::Result::InvalidAmount)
+    end
   end
 
   it "can't send to a banned user" do
+    raise "not impl"
+    # TODO once system for banning users works, check this
   end
 
   it "can't send from a banned user" do
+    raise "not impl"
+    # TODO once system for banning users works, check this
   end
 
   it "can't send if no funds available" do
+    send = StackCoin::Bot::Commands::Send.new
+    open = StackCoin::Bot::Commands::Open.new
+
+    rollback_once_finished do |tx|
+      Actor::BIGMAN.say("s!open", open)
+      Actor::YICK.say("s!open", open)
+      result = Actor::BIGMAN.say("s!send #{Actor::YICK.mention} #{StackCoin::Core::Bank::MAX_TRANSFER_AMOUNT}", send)
+      result.should be_a(StackCoin::Core::Bank::Result::InsufficentFunds)
+    end
   end
 end

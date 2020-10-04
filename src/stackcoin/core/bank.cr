@@ -33,7 +33,7 @@ class StackCoin::Core::Bank
     class InvalidAmount < Failure
     end
 
-    class InsufficientFunds < Failure
+    class InsufficentFunds < Failure
     end
 
     class BannedUser < Failure
@@ -78,7 +78,7 @@ class StackCoin::Core::Bank
     end
 
     if from_balance - amount < 0
-      return Result::InsufficientFunds.new(tx, "Insufficient funds")
+      return Result::InsufficentFunds.new(tx, "Insufficient funds")
     end
 
     from_new_balance = from_balance - amount
