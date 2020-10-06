@@ -1,5 +1,11 @@
 class StackCoin::Core::Banned
   class Result < StackCoin::Result
+    class NoSuchUserAccount < Failure
+    end
+
+    class NotAuthorized < Failure
+    end
+
     class AlreadyBanned < Failure
     end
 
@@ -13,15 +19,31 @@ class StackCoin::Core::Banned
     end
   end
 
-  def self.ban(tx : ::DB::Transaction, user_id : Int32?)
+  def self.ban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?)
+    unless invokee_id.is_a?(Int32)
+      return Result::NoSuchUserAccount.new("You doesn't have a user account")
+    end
+
+    unless user_id.is_a?(Int32)
+      return Result::NoSuchUserAccount.new("User doesn't have a user account")
+    end
+
     cnn = tx.connection
+
+    invokee_is_admin = cnn.query_one(<<-SQL, invokee_id, as: Bool)
+      SELECT admin FROM "user" WHERE id = $1
+      SQL
+
+    unless invokee_is_admin
+      return Result::NotAuthorized.new(tx, "Not authorized to ban users")
+    end
 
     already_banned = cnn.query_one(<<-SQL, user_id, as: Bool)
       SELECT banned FROM "user" WHERE id = $1
       SQL
 
     if already_banned
-      Result::AlreadyBanned.new("User was already banned")
+      return Result::AlreadyBanned.new("User was already banned")
     end
 
     cnn.exec(<<-SQL, user_id)
@@ -31,15 +53,31 @@ class StackCoin::Core::Banned
     Result::UserBanned.new("User is now banned")
   end
 
-  def self.unban(tx : ::DB::Transaction, user_id : Int32?)
+  def self.unban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?)
+    unless invokee_id.is_a?(Int32)
+      return Result::NoSuchUserAccount.new("You doesn't have a user account")
+    end
+
+    unless user_id.is_a?(Int32)
+      return Result::NoSuchUserAccount.new("User doesn't have a user account")
+    end
+
     cnn = tx.connection
+
+    invokee_is_admin = cnn.query_one(<<-SQL, invokee_id, as: Bool)
+      SELECT admin FROM "user" WHERE id = $1
+      SQL
+
+    unless invokee_is_admin
+      return Result::NotAuthorized.new(tx, "Not authorized to unban users")
+    end
 
     already_banned = cnn.query_one(<<-SQL, user_id, as: Bool)
       SELECT banned FROM "user" WHERE id = $1
       SQL
 
     unless already_banned
-      Result::AlreadyUnbanned.new("User was already unbanned")
+      return Result::AlreadyUnbanned.new("User was already unbanned")
     end
 
     cnn.exec(<<-SQL, user_id)
