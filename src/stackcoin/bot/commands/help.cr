@@ -10,7 +10,7 @@ class StackCoin::Bot::Commands
 
     def initialize(all_commands)
       all_fields = [] of Discord::EmbedField
-      all_commands.each_value do |command|
+      all_commands.each do |command|
         if command.usage
           name = "#{command.trigger} - #{command.usage}"
         else
@@ -38,7 +38,7 @@ class StackCoin::Bot::Commands
         command = parsed.arguments[0].to_s
 
         if @sub_help.has_key? command
-          # TODO send_embed(message, @sub_help[command])
+          send_embed(message, @sub_help[command])
         else
           potential = Levenshtein.find(command, @sub_help.keys)
           if potential
@@ -48,7 +48,7 @@ class StackCoin::Bot::Commands
           send_message(message, "Unknown help section: #{command}#{postfix}")
         end
       else
-        # TODO send_embed(message, @root_help)
+        send_embed(message, @root_help)
       end
     end
   end

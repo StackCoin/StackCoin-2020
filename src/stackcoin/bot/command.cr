@@ -20,12 +20,26 @@ class StackCoin::Bot
       INSTANCE.client
     end
 
+    def cache
+      INSTANCE.cache
+    end
+
     def send_message(message, content)
       client.create_message(message.channel_id, content)
     end
 
-    def cache
-      INSTANCE.cache
+    def send_embed(message, emb : Discord::Embed)
+      send_embed(message, "", emb)
+    end
+
+    def send_embed(message, content, emb : Discord::Embed)
+      emb.colour = 16773120
+      emb.timestamp = Time.utc
+      emb.footer = Discord::EmbedFooter.new(
+        text: "StackCoin™",
+        icon_url: "https://i.imgur.com/CsVxtvM.png"
+      )
+      client.create_message(message.channel_id, content, emb)
     end
   end
 end

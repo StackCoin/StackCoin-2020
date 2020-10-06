@@ -8,10 +8,13 @@ class StackCoin::Bot::Commands
     end
 
     def invoke(message, parsed, tx = nil)
+      unless parsed.arguments.size == 0
+        raise Parser::Error.new("Expected no arguments, got #{parsed.arguments.size}")
+      end
+
       author = message.author
       result = nil
       DB.transaction do |tx|
-        potential_id = user_id_from_snowflake(tx, author.id)
         result = Core::Bank.open(tx, author.id, author.username, author.avatar_url)
       end
       result = result.as(Result::Base)

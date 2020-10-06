@@ -21,6 +21,14 @@ class StackCoin::Core::Bank
       end
     end
 
+    class Balance < Success
+      getter balance : Int32
+
+      def initialize(tx, message, @balance)
+        super(tx, message)
+      end
+    end
+
     class NoSuchUserAccount < Failure
     end
 
@@ -112,6 +120,18 @@ class StackCoin::Core::Bank
       from_user_balance: from_new_balance,
       to_user_balance: to_new_balance,
     )
+  end
+
+  def self.balance(tx : ::DB::Transaction, user_id : Int32?)
+    unless user_id.is_a?(Int32)
+      return Result::NoSuchUserAccount.new(tx, "No user account to check the balance of")
+    end
+
+    balance = tx.connection.query_one(<<-SQL, user_id, as: Int32)
+      SELECT balance FROM "user" WHERE id = $1
+      SQL
+
+    Result::Balance.new(tx, "Your balance is #{balance} STK", balance)
   end
 
   def self.open(tx : ::DB::Transaction, discord_snowflake : Discord::Snowflake, username : String, avatar_url : String)

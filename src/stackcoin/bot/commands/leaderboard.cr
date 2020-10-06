@@ -9,13 +9,12 @@ class StackCoin::Bot::Commands
     end
 
     def invoke(message, parsed)
-      page = 1
-
-      if parsed.arguments.size >= 1
-        page = parsed.arguments[0].to_i
-      end
-
-      # TODO
+      page = if parsed.arguments.size == 0
+               1
+             else
+               parsed.arguments[0].to_i
+             end
+      send_message(message, "TODO")
     end
   end
 end

@@ -56,12 +56,19 @@ class StackCoin::Bot
 
   def load_commands
     all_commands = [
+      Commands::Balance.new,
+      Commands::Ban.new,
+      Commands::Circulation.new,
       Commands::Dole.new,
+      Commands::Graph.new,
       Commands::Leaderboard.new,
-      Commands::Send.new,
-      Commands::Pump.new,
       Commands::Open.new,
+      Commands::Pump.new,
+      Commands::Send.new,
+      Commands::Unban.new,
     ]
+
+    all_commands << Commands::Help.new(all_commands)
 
     all_commands.each do |command|
       @@commands[command.trigger] = command

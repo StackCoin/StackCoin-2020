@@ -33,6 +33,8 @@ class StackCoin::Bot::Commands
         results << Core::StackCoinReserveSystem.dole(tx, potential_id)
       end
 
+      send_message(message, results.join("\n") { |result| result.message })
+
       results
     end
   end
