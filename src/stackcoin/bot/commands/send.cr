@@ -25,7 +25,20 @@ class StackCoin::Bot::Commands
       result = result.as(Result::Base)
 
       if result.is_a?(Core::Bank::Result::SuccessfulTransaction)
-        send_message(message, result.message)
+        to = cache.resolve_user(user_mention.id)
+        send_embed(message, Discord::Embed.new(
+          title: "_Transaction complete_:",
+          fields: [
+            Discord::EmbedField.new(
+              name: "#{message.author.username}",
+              value: "New balance: #{result.from_user_balance} STK",
+            ),
+            Discord::EmbedField.new(
+              name: "#{to.username}",
+              value: "New balanace: #{result.to_user_balance} STK",
+            ),
+          ],
+        ))
       else
         send_message(message, result.message)
       end

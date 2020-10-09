@@ -64,6 +64,7 @@ class StackCoin::Bot
       Commands::Leaderboard.new,
       Commands::Open.new,
       Commands::Pump.new,
+      Commands::Reserves.new,
       Commands::Send.new,
       Commands::Unban.new,
     ]

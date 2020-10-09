@@ -41,4 +41,44 @@ describe "StackCoin::Bot::Commands::Dole" do
       second_result.to_user_balance.should eq StackCoin::Core::StackCoinReserveSystem::DOLE_AMOUNT
     end
   end
+
+  it "doesn't dole if asked too soon" do
+    dole = StackCoin::Bot::Commands::Dole.new
+    open = StackCoin::Bot::Commands::Open.new
+    pump = StackCoin::Bot::Commands::Pump.new
+
+    rollback_once_finished do |tx|
+      Actor::JACK.say("s!open", open)
+      Actor::JACK.say("s!pump 100 money", pump)
+
+      Actor::STEVE.say("s!dole", dole)
+      results = Actor::STEVE.say("s!dole", dole)
+
+      results.size.should eq 1
+      results[0].should be_a(StackCoin::Core::StackCoinReserveSystem::Result::PrematureDole)
+    end
+  end
+
+  it "dole if time has passed since last dole" do
+    dole = StackCoin::Bot::Commands::Dole.new
+    open = StackCoin::Bot::Commands::Open.new
+    pump = StackCoin::Bot::Commands::Pump.new
+
+    rollback_once_finished do |tx|
+      Actor::JACK.say("s!open", open)
+      Actor::JACK.say("s!pump 100 money", pump)
+
+      Actor::STEVE.say("s!dole", dole)
+
+      two_days_from_now = Time.utc - 2.days
+      tx.connection.exec(<<-SQL, two_days_from_now, Actor::STEVE.id(tx))
+        UPDATE "user" SET last_given_dole = $1 WHERE id = $2
+        SQL
+
+      results = Actor::STEVE.say("s!dole", dole)
+
+      results.size.should eq 1
+      results[0].should be_a(StackCoin::Core::StackCoinReserveSystem::Result::GivenDole)
+    end
+  end
 end
