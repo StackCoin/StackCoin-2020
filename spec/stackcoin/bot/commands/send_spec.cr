@@ -28,9 +28,11 @@ describe "StackCoin::Bot::Commands::Pump" do
       result = result.as(StackCoin::Core::Bank::Result::SuccessfulTransaction)
 
       cnn = tx.connection
-      from_id, from_new_balance, to_id, to_new_balance = cnn.query_one(<<-SQL, result.transaction_id, as: {Int32, Int32, Int32, Int32})
-        SELECT from_id, from_new_balance, to_id, to_new_balance FROM "transaction" WHERE id = $1
+      from_id, from_new_balance, to_id, to_new_balance, amount_from_db = cnn.query_one(<<-SQL, result.transaction_id, as: {Int32, Int32, Int32, Int32, Int32})
+        SELECT from_id, from_new_balance, to_id, to_new_balance, amount FROM "transaction" WHERE id = $1
         SQL
+
+      amount_from_db.should eq amount
 
       from_id.should eq Actor::STEVE.id(tx)
       from_new_balance.should eq StackCoin::Core::StackCoinReserveSystem::DOLE_AMOUNT - amount

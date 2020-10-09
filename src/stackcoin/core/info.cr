@@ -25,8 +25,6 @@ class StackCoin::Core::Info
     end
   end
 
-  MAX_TRANSFER_AMOUNT = 100000
-
   def self.circulation(tx : ::DB::Transaction)
     amount = tx.connection.query_one(<<-SQL, as: Int64)
       SELECT SUM(balance) FROM "user"

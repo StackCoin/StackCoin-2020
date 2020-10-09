@@ -34,6 +34,7 @@ CREATE TABLE "transaction" (
   "from_new_balance" integer not null CHECK ("from_new_balance" >= 0),
   "to_id" integer not null references "user"(id),
   "to_new_balance" integer not null CHECK ("to_new_balance" >= 0),
+  "amount" integer not null CHECK ("amount" >= 1),
   "time" timestamp not null,
   "label" text,
   CHECK ("from_id" <> "to_id")

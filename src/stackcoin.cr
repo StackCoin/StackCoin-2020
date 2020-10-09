@@ -7,6 +7,8 @@ require "./stackcoin/bot"
 
 module StackCoin
   def self.run!
+    Dir.mkdir_p("/tmp/stackcoin/")
+
     run_migrations
 
     spawn(Bot.run!)
