@@ -1,7 +1,7 @@
 class StackCoin::Bot::Commands
   class Reserves < Command
     getter trigger = "reserves"
-    getter aliases = ["reserve"]
+    getter aliases = ["r", "reserve"]
     getter desc = "Check the amount of STK in StackCoin"
 
     def initialize

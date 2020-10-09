@@ -1,7 +1,7 @@
 class StackCoin::Bot::Commands
   class Circulation < Command
     getter trigger = "circulation"
-    getter aliases = ["circ"]
+    getter aliases = ["c", "circ"]
     getter desc = "Check the amount of STK in circlation"
 
     def initialize
@@ -12,7 +12,19 @@ class StackCoin::Bot::Commands
         raise Parser::Error.new("Expected no arguments, got #{parsed.arguments.size}")
       end
 
-      send_message(message, "TODO")
+      result = nil
+      DB.transaction do |tx|
+        result = Core::Info.circulation(tx)
+      end
+      result = result.as(Core::Info::Result::Circulation)
+
+      send_embed(message, Discord::Embed.new(
+        title: "_Total StackCoin in Circulation:_",
+        fields: [Discord::EmbedField.new(
+          name: "#{result.amount} STK",
+          value: "Since #{EPOCH}",
+        )]
+      ))
     end
   end
 end

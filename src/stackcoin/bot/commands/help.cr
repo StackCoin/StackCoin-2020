@@ -1,7 +1,7 @@
 class StackCoin::Bot::Commands
   class Help < Command
     getter trigger = "help"
-    getter aliases = ["what"]
+    getter aliases = ["h", "what"]
     getter usage = "<?command>"
     getter desc = "Descriptions and usage of every StackCoin command"
 

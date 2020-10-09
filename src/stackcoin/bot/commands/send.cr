@@ -1,7 +1,7 @@
 class StackCoin::Bot::Commands
   class Send < Command
     getter trigger = "send"
-    getter aliases = ["transfer"]
+    getter aliases = ["s", "transfer"]
     getter usage = "<@user> <#amount>"
     getter desc = "Send your STK to others"
 

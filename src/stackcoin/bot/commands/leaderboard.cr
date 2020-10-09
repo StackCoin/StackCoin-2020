@@ -1,7 +1,7 @@
 class StackCoin::Bot::Commands
   class Leaderboard < Command
     getter trigger = "leaderboard"
-    getter aliases = ["scoreboard"]
+    getter aliases = ["l", "scoreboard"]
     getter usage = "<?#page=1>"
     getter desc = "List of users, ranked by balance"
 
