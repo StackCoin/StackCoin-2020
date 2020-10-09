@@ -9,6 +9,20 @@ class StackCoin::Core::Info
         super(tx, message)
       end
     end
+
+    class Leaderboard < Success
+      class Entry
+        include ::DB::Serializable
+        getter username : String
+        getter balance : Int32
+      end
+
+      getter entries : Array(Entry)
+
+      def initialize(tx, message, @entries)
+        super(tx, message)
+      end
+    end
   end
 
   MAX_TRANSFER_AMOUNT = 100000
@@ -22,6 +36,19 @@ class StackCoin::Core::Info
       tx,
       "#{amount} STK currently in circulation",
       amount: amount,
+    )
+  end
+
+  def self.leaderboard(tx : ::DB::Transaction, limit : Int32 = 5, offset : Int32 = 0)
+    entries = Result::Leaderboard::Entry.from_rs(tx.connection.query(<<-SQL, limit, offset))
+      SELECT username, balance FROM "user"
+      ORDER BY balance DESC LIMIT $1 OFFSET $2
+      SQL
+
+    Result::Leaderboard.new(
+      tx,
+      "Rankings, limited by #{limit} and offsetted by #{offset}",
+      entries: entries,
     )
   end
 end
