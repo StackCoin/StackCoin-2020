@@ -105,6 +105,8 @@ class StackCoin::Bot::Parser
 
     return if !parser.saw_prefix
 
+    parser.skip_whitespace
+
     command = parser.read_argument.to_s
 
     arguments = Array(Argument).new
@@ -145,6 +147,17 @@ class StackCoin::Bot::Parser
     end
 
     false
+  end
+
+  def skip_whitespace
+    while @reader.has_next?
+      case @reader.current_char
+      when ' '
+        @reader.next_char
+      else
+        return
+      end
+    end
   end
 
   def parse
