@@ -56,4 +56,15 @@ describe "StackCoin::Bot::Commands::Pump" do
       result.should be_a(StackCoin::Core::StackCoinReserveSystem::Result::NotAuthorized)
     end
   end
+
+  it "market isn't pumped if pump amount is 0" do
+    open = StackCoin::Bot::Commands::Open.new
+    pump = StackCoin::Bot::Commands::Pump.new
+
+    rollback_once_finished do |tx|
+      Actor::JACK.say("s!open", open)
+      result = Actor::JACK.say("s!pump 0 NO", pump)
+      result.should be_a(StackCoin::Core::StackCoinReserveSystem::Result::InvalidAmount)
+    end
+  end
 end

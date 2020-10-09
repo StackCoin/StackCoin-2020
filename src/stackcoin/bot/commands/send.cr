@@ -25,7 +25,6 @@ class StackCoin::Bot::Commands
       result = result.as(Result::Base)
 
       if result.is_a?(Core::Bank::Result::SuccessfulTransaction)
-        # TODO embed and such
         send_message(message, result.message)
       else
         send_message(message, result.message)

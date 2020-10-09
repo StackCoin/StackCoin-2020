@@ -1,12 +1,14 @@
 require "../../../spec_helper"
 require "../../../../src/stackcoin/bot/command"
 require "../../../../src/stackcoin/core/bank"
+require "../../../../src/stackcoin/core/banned"
 require "../../../../src/stackcoin/core/stackcoin_reserve_system"
 
-require "../../../../src/stackcoin/bot/commands/open"
-require "../../../../src/stackcoin/bot/commands/pump"
-require "../../../../src/stackcoin/bot/commands/dole"
 require "../../../../src/stackcoin/bot/commands/send"
+require "../../../../src/stackcoin/bot/commands/open"
+require "../../../../src/stackcoin/bot/commands/dole"
+require "../../../../src/stackcoin/bot/commands/pump"
+require "../../../../src/stackcoin/bot/commands/ban"
 
 describe "StackCoin::Bot::Commands::Pump" do
   it "send money from one user to another" do
@@ -94,13 +96,40 @@ describe "StackCoin::Bot::Commands::Pump" do
   end
 
   it "can't send to a banned user" do
-    raise "not impl"
-    # TODO once system for banning users works, check this
+    send = StackCoin::Bot::Commands::Send.new
+    dole = StackCoin::Bot::Commands::Dole.new
+    open = StackCoin::Bot::Commands::Open.new
+    pump = StackCoin::Bot::Commands::Pump.new
+    ban = StackCoin::Bot::Commands::Ban.new
+
+    rollback_once_finished do |tx|
+      Actor::JACK.say("s!open", open)
+      Actor::JACK.say("s!pump 100 money", pump)
+      Actor::NINT.say("s!dole", dole)
+      Actor::JACK.say("s!dole", dole)
+      Actor::JACK.say("s!ban #{Actor::NINT.mention}", ban)
+
+      result = Actor::JACK.say("s!send #{Actor::NINT.mention} 10", send)
+      result.should be_a(StackCoin::Core::Bank::Result::BannedUser)
+    end
   end
 
   it "can't send from a banned user" do
-    raise "not impl"
-    # TODO once system for banning users works, check this
+    send = StackCoin::Bot::Commands::Send.new
+    dole = StackCoin::Bot::Commands::Dole.new
+    open = StackCoin::Bot::Commands::Open.new
+    pump = StackCoin::Bot::Commands::Pump.new
+    ban = StackCoin::Bot::Commands::Ban.new
+
+    rollback_once_finished do |tx|
+      Actor::JACK.say("s!open", open)
+      Actor::JACK.say("s!pump 100 money", pump)
+      Actor::NINT.say("s!dole", dole)
+      Actor::JACK.say("s!ban #{Actor::NINT.mention}", ban)
+
+      result = Actor::NINT.say("s!send #{Actor::JACK.mention} 10", send)
+      result.should be_a(StackCoin::Core::Bank::Result::BannedUser)
+    end
   end
 
   it "can't send if no funds available" do

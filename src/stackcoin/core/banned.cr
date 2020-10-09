@@ -87,6 +87,9 @@ class StackCoin::Core::Banned
     Result::UserUnbanned.new("User is now unbanned")
   end
 
-  def self.is_banned(user_id : Int32?)
+  def self.is_banned(tx : ::DB::Transaction, user_id : Int32?)
+    tx.connection.query_one(<<-SQL, user_id, as: Bool)
+      SELECT banned FROM "user" WHERE id = $1
+      SQL
   end
 end

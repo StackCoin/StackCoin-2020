@@ -12,6 +12,9 @@ class StackCoin::Core::StackCoinReserveSystem
     class NotAuthorized < Failure
     end
 
+    class InvalidAmount < Failure
+    end
+
     class EmptyReserves < Failure
     end
 
@@ -58,6 +61,10 @@ class StackCoin::Core::StackCoinReserveSystem
       return Result::NoSuchUserAccount.new(tx, "You don't have an user account to pump the StackCoin Reserve System with yet")
     end
 
+    unless amount > 0
+      return Result::InvalidAmount.new(tx, "Pump amount must be greater than 0")
+    end
+
     now = Time.utc
     cnn = tx.connection
 
@@ -95,7 +102,7 @@ class StackCoin::Core::StackCoinReserveSystem
 
     return Result::Pump.new(
       tx,
-      "Successfully pumped the StackCoin Reserve System with #{amount} STK",
+      "Successfully pumped the StackCoin Reserve System with #{amount} STK, with label: \"#{label}\"",
       pump_id: pump_id,
       stackcoin_reserve_system_user_balance: new_balance,
     )

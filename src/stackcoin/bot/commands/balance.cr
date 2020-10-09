@@ -31,7 +31,7 @@ class StackCoin::Bot::Commands
           title: "_Balance:_",
           fields: [Discord::EmbedField.new(
             name: "#{user.username}",
-            value: "#{result.message}",
+            value: "#{result.balance} STK",
           )]
         ))
       else

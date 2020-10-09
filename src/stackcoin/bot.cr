@@ -32,8 +32,6 @@ class StackCoin::Bot
     load_commands
 
     @client.on_message_create do |message|
-      before = Time.utc
-
       begin
         next if message.guild_id.is_a?(Nil) || message.author.bot
         handle_message(message)
@@ -49,11 +47,6 @@ class StackCoin::Bot
           ```
           MESSAGE
       end
-
-      after = Time.utc
-
-      span = after - before
-      puts "took #{span.milliseconds}"
     end
   end
 
