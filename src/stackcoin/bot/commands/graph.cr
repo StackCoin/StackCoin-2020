@@ -24,9 +24,21 @@ class StackCoin::Bot::Commands
         result = Core::Graph.balance_over_time(tx, potential_id)
         p result
       end
-      #result = result.as(Core::Info::Result::Leaderboard)
+      result = result.as(Result::Base)
 
-      send_message(message, "TODO")
+      if result.is_a? Core::Graph::Result::File
+        user = cache.resolve_user(snowflake)
+        client.upload_file(
+          channel_id: message.channel_id,
+          content: "#{user.username}'s STK balance over time",
+          file: result.file
+        )
+        result.file.delete
+      else
+        send_message(message, result.message)
+      end
+
+      result
     end
   end
 end

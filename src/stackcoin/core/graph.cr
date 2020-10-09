@@ -45,6 +45,7 @@ class StackCoin::Core::Graph
       datapoints += 1
       writer.puts("#{b.time},#{b.to_new_balance},#{b.amount}")
     end
+    writer.close
 
     if datapoints <= 1
       return Result::NotEnoughDatapoints.new("Not enough datapoints!")
@@ -52,7 +53,7 @@ class StackCoin::Core::Graph
 
     random = UUID.random
     image_filename = "/tmp/stackcoin/graph_#{user_id}_#{random}.png"
-    title = "#{user_id} - #{Time.utc}"
+    title = "User ##{user_id} - #{Time.utc}"
 
     process = Process.new(
       "gnuplot",
@@ -64,9 +65,6 @@ class StackCoin::Core::Graph
 
     stdout = process.output.gets_to_end
     stderr = process.error.gets_to_end
-
-    puts stdout
-    puts stderr
 
     raise stderr if stderr != ""
 
