@@ -2,6 +2,7 @@ class StackCoin::Bot::Commands
   class Balance < Command
     getter trigger = "balance"
     getter aliases = ["bal"]
+    getter usage = "<?@other_user>"
     getter desc = "Check yours or another users balance"
 
     def initialize

@@ -31,7 +31,7 @@ class StackCoin::Core::Info
         getter username : String
         getter balance : Int32
         getter created_at : Time
-        getter last_given_dole : Time
+        getter last_given_dole : Time?
       end
 
       getter data : Data

@@ -1,11 +1,9 @@
 class StackCoin::Bot::Commands
   class Profile < Command
-    LIMIT = 5
-
-    getter trigger = "transactions"
-    getter aliases = ["t", "ledger", "l"]
-    getter usage = "<?#page=1> TODO"
-    getter desc = "List of users, ranked by balance"
+    getter trigger = "profile"
+    getter aliases = ["p"]
+    getter usage = "<?@other_user>"
+    getter desc = "Misc. pieces of information on user accounts"
 
     def initialize
     end
@@ -32,10 +30,10 @@ class StackCoin::Bot::Commands
         fields = [] of Discord::EmbedField
 
         fields << Discord::EmbedField.new(
-          name: "#{profile.username} (#{profile.id})",
+          name: "#{profile.username} `\##{profile.id}`",
           value: <<-TEXT
             Balance: #{profile.balance} STK
-            Created at : #{profile.created_at}
+            Created at: #{profile.created_at}
             Last given dole: #{profile.last_given_dole}
             TEXT
         )

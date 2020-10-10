@@ -107,7 +107,7 @@ class StackCoin::Bot::Parser
 
     parser.skip_whitespace
 
-    command = parser.read_argument.to_s
+    command = parser.read_argument.to_s.downcase
 
     arguments = Array(Argument).new
 

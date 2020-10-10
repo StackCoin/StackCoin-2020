@@ -121,8 +121,8 @@ class StackCoin::Core::StackCoinReserveSystem
     if last_given_dole = to_user_last_given_dole
       if last_given_dole.day == now.day
         time_till_rollver = HumanizeTime.distance_of_time_in_words(now.at_end_of_day - now, now)
-        time_since_dole = HumanizeTime.distance_of_time_in_words(last_given_dole - now, now)
-        return Result::PrematureDole.new("Dole already received #{time_since_dole}, rollover in #{time_till_rollver}")
+        time_since_dole = HumanizeTime.distance_of_time_in_words(now - last_given_dole)
+        return Result::PrematureDole.new("Dole already received #{time_since_dole} ago, rollover in #{time_till_rollver}")
       end
     end
 
