@@ -7,8 +7,8 @@ class StackCoin::Core::Graph
     class File < Success
       getter file : ::File
 
-      def initialize(tx, message, @file)
-        super(tx, message)
+      def initialize(message, @file)
+        super(message)
       end
     end
 
@@ -26,17 +26,15 @@ class StackCoin::Core::Graph
     getter amount : Int32
   end
 
-  def self.balance_over_time(tx : ::DB::Transaction, user_id : Int32?)
+  def self.balance_over_time(cnn : ::DB::Connection, user_id : Int32?)
     unless user_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new(tx, "No user account to graph")
+      return Result::NoSuchUserAccount.new("No user account to graph")
     end
 
-    balance_over_time = BalanceAtTime.from_rs(tx.connection.query(<<-SQL, user_id))
+    balance_over_time = BalanceAtTime.from_rs(cnn.query(<<-SQL, user_id))
       SELECT time, to_new_balance, amount FROM "transaction"
       WHERE to_id = $1 ORDER BY time
       SQL
-
-    p balance_over_time
 
     datapoints = 0
     reader, writer = IO.pipe
@@ -68,6 +66,6 @@ class StackCoin::Core::Graph
 
     raise stderr if stderr != ""
 
-    Result::File.new(tx, "Balance over time graph", File.open(image_filename))
+    Result::File.new("Balance over time graph", File.open(image_filename))
   end
 end

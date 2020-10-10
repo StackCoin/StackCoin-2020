@@ -8,24 +8,24 @@ class StackCoin::Core::Bank
       getter from_user_balance : Int32
       getter to_user_balance : Int32
 
-      def initialize(tx, message, @transaction_id, @from_user_balance, @to_user_balance)
-        super(tx, message)
+      def initialize(message, @transaction_id, @from_user_balance, @to_user_balance)
+        super(message)
       end
     end
 
     class NewUserAccount < Success
       getter new_user_id : Int32
 
-      def initialize(tx, message, @new_user_id)
-        super(tx, message)
+      def initialize(message, @new_user_id)
+        super(message)
       end
     end
 
     class Balance < Success
       getter balance : Int32
 
-      def initialize(tx, message, @balance)
-        super(tx, message)
+      def initialize(message, @balance)
+        super(message)
       end
     end
 
@@ -52,23 +52,23 @@ class StackCoin::Core::Bank
 
   def self.transfer(tx : ::DB::Transaction, from_user_id : Int32?, to_user_id : Int32?, amount : Int32, label : String? = nil)
     unless from_user_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new(tx, "You don't have an user account yet")
+      return Result::NoSuchUserAccount.new("You don't have an user account yet")
     end
 
     unless to_user_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new(tx, "Recieving user doesn't have an user account")
+      return Result::NoSuchUserAccount.new("Recieving user doesn't have an user account")
     end
 
     if from_user_id == to_user_id
-      return Result::TransferSelf.new(tx, "Can't transfer money to self")
+      return Result::TransferSelf.new("Can't transfer money to self")
     end
 
     unless amount > 0
-      return Result::InvalidAmount.new(tx, "Amount must be greater than zero")
+      return Result::InvalidAmount.new("Amount must be greater than zero")
     end
 
     if amount > MAX_TRANSFER_AMOUNT
-      return Result::InvalidAmount.new(tx, "Amount can't be greater than #{MAX_TRANSFER_AMOUNT}")
+      return Result::InvalidAmount.new("Amount can't be greater than #{MAX_TRANSFER_AMOUNT}")
     end
 
     cnn = tx.connection
@@ -82,11 +82,11 @@ class StackCoin::Core::Bank
       SQL
 
     if from_banned || to_banned
-      return Result::BannedUser.new(tx, "Banned user mentioned in transfer")
+      return Result::BannedUser.new("Banned user mentioned in transfer")
     end
 
     if from_balance - amount < 0
-      return Result::InsufficentFunds.new(tx, "Insufficient funds")
+      return Result::InsufficentFunds.new("Insufficient funds")
     end
 
     from_new_balance = from_balance - amount
@@ -115,7 +115,6 @@ class StackCoin::Core::Bank
       SQL
 
     Result::SuccessfulTransaction.new(
-      tx,
       "Transfer sucessful",
       transaction_id: transaction_id,
       from_user_balance: from_new_balance,
@@ -123,16 +122,16 @@ class StackCoin::Core::Bank
     )
   end
 
-  def self.balance(tx : ::DB::Transaction, user_id : Int32?)
+  def self.balance(cnn : ::DB::Connection, user_id : Int32?)
     unless user_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new(tx, "No user account to check the balance of")
+      return Result::NoSuchUserAccount.new("No user account to check the balance of")
     end
 
-    balance = tx.connection.query_one(<<-SQL, user_id, as: Int32)
+    balance = cnn.query_one(<<-SQL, user_id, as: Int32)
       SELECT balance FROM "user" WHERE id = $1
       SQL
 
-    Result::Balance.new(tx, "Your balance is #{balance} STK", balance)
+    Result::Balance.new("Your balance is #{balance} STK", balance)
   end
 
   def self.open(tx : ::DB::Transaction, discord_snowflake : Discord::Snowflake, username : String, avatar_url : String)
@@ -154,7 +153,7 @@ class StackCoin::Core::Bank
       SQL
 
     if preexisting_id
-      return Result::PreExistingUserAccount.new(tx, "You already have an user account associated with your Discord account")
+      return Result::PreExistingUserAccount.new("You already have an user account associated with your Discord account")
     end
 
     user_id = cnn.query_one(<<-SQL, created_at, username, avatar_url, balance, admin, banned, as: Int32)
@@ -178,6 +177,6 @@ class StackCoin::Core::Bank
       )
       SQL
 
-    return Result::NewUserAccount.new(tx, "User account created", user_id)
+    Result::NewUserAccount.new("User account created", user_id)
   end
 end

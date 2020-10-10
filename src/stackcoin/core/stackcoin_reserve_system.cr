@@ -23,8 +23,8 @@ class StackCoin::Core::StackCoinReserveSystem
       getter stackcoin_reserve_system_user_balance : Int32
       getter to_user_balance : Int32
 
-      def initialize(tx, message, @transaction_id, @stackcoin_reserve_system_user_balance, @to_user_balance)
-        super(tx, message)
+      def initialize(message, @transaction_id, @stackcoin_reserve_system_user_balance, @to_user_balance)
+        super(message)
       end
     end
 
@@ -32,8 +32,8 @@ class StackCoin::Core::StackCoinReserveSystem
       getter pump_id : Int32
       getter stackcoin_reserve_system_user_balance : Int32
 
-      def initialize(tx, message, @pump_id, @stackcoin_reserve_system_user_balance)
-        super(tx, message)
+      def initialize(message, @pump_id, @stackcoin_reserve_system_user_balance)
+        super(message)
       end
     end
   end
@@ -43,11 +43,10 @@ class StackCoin::Core::StackCoinReserveSystem
 
   class_getter stackcoin_reserve_system_user_id : Int32? = nil
 
-  def self.stackcoin_reserve_system_user(tx : ::DB::Transaction)
+  def self.stackcoin_reserve_system_user(cnn : ::DB::Connection)
     if stackcoin_reserve_system_user_id = @@stackcoin_reserve_system_user_id
       return stackcoin_reserve_system_user_id
     else
-      cnn = tx.connection
       stackcoin_reserve_system_user_id = cnn.query_one(<<-SQL, STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER, as: Int32)
         SELECT id FROM "internal_user" WHERE identifier = $1
         SQL
@@ -58,11 +57,11 @@ class StackCoin::Core::StackCoinReserveSystem
 
   def self.pump(tx : ::DB::Transaction, signee_id : Int32?, amount : Int32, label : String)
     unless signee_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new(tx, "You don't have an user account to pump the StackCoin Reserve System with yet")
+      return Result::NoSuchUserAccount.new("You don't have an user account to pump the StackCoin Reserve System with yet")
     end
 
     unless amount > 0
-      return Result::InvalidAmount.new(tx, "Pump amount must be greater than 0")
+      return Result::InvalidAmount.new("Pump amount must be greater than 0")
     end
 
     now = Time.utc
@@ -73,10 +72,10 @@ class StackCoin::Core::StackCoinReserveSystem
       SQL
 
     unless signee_is_admin
-      return Result::NotAuthorized.new(tx, "Not authorized to pump the StackCoin Reserve System")
+      return Result::NotAuthorized.new("Not authorized to pump the StackCoin Reserve System")
     end
 
-    user_id = stackcoin_reserve_system_user(tx)
+    user_id = stackcoin_reserve_system_user(cnn)
 
     current_balance = cnn.query_one(<<-SQL, user_id, as: Int32)
       SELECT balance FROM "user" WHERE id = $1
@@ -101,7 +100,6 @@ class StackCoin::Core::StackCoinReserveSystem
       SQL
 
     return Result::Pump.new(
-      tx,
       "Successfully pumped the StackCoin Reserve System with #{amount} STK, with label: \"#{label}\"",
       pump_id: pump_id,
       stackcoin_reserve_system_user_balance: new_balance,
@@ -110,7 +108,7 @@ class StackCoin::Core::StackCoinReserveSystem
 
   def self.dole(tx : ::DB::Transaction, to_user_id : Int32?)
     unless to_user_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new(tx, "You don't have an user account to deposit dole to yet")
+      return Result::NoSuchUserAccount.new("You don't have an user account to deposit dole to yet")
     end
 
     now = Time.utc
@@ -123,12 +121,15 @@ class StackCoin::Core::StackCoinReserveSystem
     if last_given_dole = to_user_last_given_dole
       if last_given_dole.day == now.day
         time_till_rollver = HumanizeTime.distance_of_time_in_words(now.at_end_of_day - now, now)
-        return Result::PrematureDole.new(tx, "Dole already received today, rollover in #{time_till_rollver}")
+        time_since_dole = HumanizeTime.distance_of_time_in_words(last_given_dole - now, now)
+        return Result::PrematureDole.new("Dole already received #{time_since_dole}, rollover in #{time_till_rollver}")
       end
     end
 
-    from_user_id = stackcoin_reserve_system_user(tx)
+    from_user_id = stackcoin_reserve_system_user(cnn)
     result = Bank.transfer(tx, from_user_id, to_user_id, amount: DOLE_AMOUNT)
+
+    # TODO handle every type of result the bank can throw back
 
     if result.is_a?(Core::Bank::Result::SuccessfulTransaction)
       cnn.exec(<<-SQL, now, to_user_id)
@@ -136,7 +137,6 @@ class StackCoin::Core::StackCoinReserveSystem
         SQL
 
       return Result::GivenDole.new(
-        tx,
         "Dole given, your new balance is #{result.to_user_balance}",
         transaction_id: result.transaction_id,
         stackcoin_reserve_system_user_balance: result.from_user_balance,
@@ -144,6 +144,6 @@ class StackCoin::Core::StackCoinReserveSystem
       )
     end
 
-    Result::EmptyReserves.new(tx, "The StackCoin Reserve System is empty, dole cannot be given")
+    Result::EmptyReserves.new("The StackCoin Reserve System is empty, dole cannot be given")
   end
 end

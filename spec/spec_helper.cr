@@ -11,10 +11,12 @@ begin
 end
 
 class MockBot
-  MOCK_CLIENT = MockClient.new
-
   def client
-    MOCK_CLIENT
+    MockClient::INSTANCE
+  end
+
+  def cache
+    MockCache::INSTANCE
   end
 end
 

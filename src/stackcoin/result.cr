@@ -18,20 +18,12 @@ class StackCoin::Result
     def initialize(@message)
       @success = name
     end
-
-    def initialize(tx, @message)
-      @success = name
-    end
   end
 
   class Failure < Base
     getter failure : String
 
     def initialize(@message)
-      @failure = name
-    end
-
-    def initialize(tx, @message)
       @failure = name
     end
   end

@@ -12,20 +12,22 @@ class StackCoin::Bot::Commands
         raise Parser::Error.new("Expected no arguments, got #{parsed.arguments.size}")
       end
 
-      result = nil
-      DB.transaction do |tx|
-        stackcoin_reserve_system_user_id = StackCoin::Core::StackCoinReserveSystem.stackcoin_reserve_system_user(tx)
-        result = Core::Bank.balance(tx, stackcoin_reserve_system_user_id)
+      result = DB.using_connection do |cnn|
+        stackcoin_reserve_system_user_id = StackCoin::Core::StackCoinReserveSystem.stackcoin_reserve_system_user(cnn)
+        Core::Bank.balance(cnn, stackcoin_reserve_system_user_id)
       end
-      result = result.as(Core::Bank::Result::Balance)
 
-      send_embed(message, Discord::Embed.new(
-        title: "_Reserves:_",
-        fields: [Discord::EmbedField.new(
-          name: StackCoin::Core::StackCoinReserveSystem::STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER,
-          value: "#{result.balance} STK",
-        )]
-      ))
+      if result.is_a?(Core::Bank::Result::Balance)
+        send_embed(message, Discord::Embed.new(
+          title: "_Reserves:_",
+          fields: [Discord::EmbedField.new(
+            name: StackCoin::Core::StackCoinReserveSystem::STACKCOIN_RESERVE_SYSTEM_USER_IDENTIFIER,
+            value: "#{result.balance} STK",
+          )]
+        ))
+      else
+        send_message(message, result.message)
+      end
     end
   end
 end

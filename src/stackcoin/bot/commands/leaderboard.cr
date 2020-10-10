@@ -23,11 +23,9 @@ class StackCoin::Bot::Commands
 
       offset = (page - 1) * LIMIT
 
-      result = nil
-      DB.transaction do |tx|
-        result = Core::Info.leaderboard(tx, limit: LIMIT, offset: offset)
+      result = DB.using_connection do |cnn|
+        Core::Info.leaderboard(cnn, limit: LIMIT, offset: offset)
       end
-      result = result.as(Core::Info::Result::Leaderboard)
 
       fields = [] of Discord::EmbedField
 

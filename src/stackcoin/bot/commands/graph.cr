@@ -18,13 +18,10 @@ class StackCoin::Bot::Commands
                     message.author.id
                   end
 
-      result = nil
-      DB.transaction do |tx|
-        potential_id = user_id_from_snowflake(tx, snowflake)
-        result = Core::Graph.balance_over_time(tx, potential_id)
-        p result
+      result = DB.using_connection do |cnn|
+        potential_id = user_id_from_snowflake(cnn, snowflake)
+        Core::Graph.balance_over_time(cnn, potential_id)
       end
-      result = result.as(Result::Base)
 
       if result.is_a? Core::Graph::Result::File
         user = cache.resolve_user(snowflake)

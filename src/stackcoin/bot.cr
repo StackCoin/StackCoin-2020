@@ -63,6 +63,7 @@ class StackCoin::Bot
       Commands::Graph.new,
       Commands::Leaderboard.new,
       Commands::Open.new,
+      Commands::Profile.new,
       Commands::Pump.new,
       Commands::Reserves.new,
       Commands::Send.new,

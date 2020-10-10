@@ -19,7 +19,8 @@ class StackCoin::Bot::Commands
       author = message.author
       result = nil
       DB.transaction do |tx|
-        potential_id = user_id_from_snowflake(tx, author.id)
+        cnn = tx.connection
+        potential_id = user_id_from_snowflake(cnn, author.id)
         result = Core::StackCoinReserveSystem.pump(tx, potential_id, amount, label)
       end
       result = result.as(Result::Base)

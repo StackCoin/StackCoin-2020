@@ -35,7 +35,7 @@ class StackCoin::Core::Banned
       SQL
 
     unless invokee_is_admin
-      return Result::NotAuthorized.new(tx, "Not authorized to ban users")
+      return Result::NotAuthorized.new("Not authorized to ban users")
     end
 
     already_banned = cnn.query_one(<<-SQL, user_id, as: Bool)
@@ -69,7 +69,7 @@ class StackCoin::Core::Banned
       SQL
 
     unless invokee_is_admin
-      return Result::NotAuthorized.new(tx, "Not authorized to unban users")
+      return Result::NotAuthorized.new("Not authorized to unban users")
     end
 
     already_banned = cnn.query_one(<<-SQL, user_id, as: Bool)
@@ -87,8 +87,8 @@ class StackCoin::Core::Banned
     Result::UserUnbanned.new("User is now unbanned")
   end
 
-  def self.is_banned(tx : ::DB::Transaction, user_id : Int32?)
-    tx.connection.query_one(<<-SQL, user_id, as: Bool)
+  def self.is_banned(cnn : ::DB::Connection, user_id : Int32?)
+    cnn.query_one(<<-SQL, user_id, as: Bool)
       SELECT banned FROM "user" WHERE id = $1
       SQL
   end

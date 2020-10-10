@@ -21,7 +21,7 @@ describe "StackCoin::Bot::Commands::Unban" do
       result = Actor::JACK.say("s!unban #{Actor::NINT.mention}", unban)
       result.should be_a(StackCoin::Core::Banned::Result::UserUnbanned)
 
-      is_banned = StackCoin::Core::Banned.is_banned(tx, Actor::NINT.id(tx))
+      is_banned = StackCoin::Core::Banned.is_banned(tx.connection, Actor::NINT.id(tx))
       is_banned.should be_false
     end
   end
@@ -40,7 +40,7 @@ describe "StackCoin::Bot::Commands::Unban" do
       result = Actor::JACK.say("s!unban #{Actor::NINT.mention}", unban)
       result.should be_a(StackCoin::Core::Banned::Result::AlreadyUnbanned)
 
-      is_banned = StackCoin::Core::Banned.is_banned(tx, Actor::NINT.id(tx))
+      is_banned = StackCoin::Core::Banned.is_banned(tx.connection, Actor::NINT.id(tx))
       is_banned.should be_false
     end
   end

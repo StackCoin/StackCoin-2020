@@ -17,7 +17,8 @@ class StackCoin::Bot::Commands
       DB.transaction do |tx|
         author = message.author
 
-        potential_id = user_id_from_snowflake(tx, author.id)
+        cnn = tx.connection
+        potential_id = user_id_from_snowflake(cnn, author.id)
 
         if !potential_id
           result = Core::Bank.open(tx, author.id, author.username, author.avatar_url)

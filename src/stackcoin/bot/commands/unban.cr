@@ -16,8 +16,9 @@ class StackCoin::Bot::Commands
 
       result = nil
       DB.transaction do |tx|
-        invokee_id = user_id_from_snowflake(tx, message.author.id)
-        user_id = user_id_from_snowflake(tx, Discord::Snowflake.new(user_mention.id))
+        cnn = tx.connection
+        invokee_id = user_id_from_snowflake(cnn, message.author.id)
+        user_id = user_id_from_snowflake(cnn, Discord::Snowflake.new(user_mention.id))
         result = Core::Banned.unban(tx, invokee_id, user_id)
       end
       result = result.as(Result::Base)

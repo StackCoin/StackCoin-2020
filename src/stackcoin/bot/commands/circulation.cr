@@ -12,11 +12,9 @@ class StackCoin::Bot::Commands
         raise Parser::Error.new("Expected no arguments, got #{parsed.arguments.size}")
       end
 
-      result = nil
-      DB.transaction do |tx|
-        result = Core::Info.circulation(tx)
+      result = DB.using_connection do |cnn|
+        Core::Info.circulation(cnn)
       end
-      result = result.as(Core::Info::Result::Circulation)
 
       send_embed(message, Discord::Embed.new(
         title: "_Total StackCoin in Circulation:_",
