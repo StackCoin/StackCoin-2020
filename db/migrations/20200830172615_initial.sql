@@ -59,7 +59,7 @@ CREATE TABLE "request" (
   "status" request_status not null,
   "amount" integer not null CHECK ("amount" > 0),
   "requested_at" timestamp not null,
-  "transaction" integer references "transaction"(id),
+  "transaction_id" integer references "transaction"(id),
   "resolved_at" timestamp,
   "label" text
 );

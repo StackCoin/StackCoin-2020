@@ -31,4 +31,8 @@ dependencies:
   humanize_time:
     github: mamantoha/humanize_time
 
+  kemal:
+    github: kemalcr/kemal
+    branch: master
+
 crystal: 0.35.1

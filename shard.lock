@@ -12,6 +12,10 @@ shards:
     git: https://github.com/gdotdesign/cr-dotenv.git
     version: 0.7.0
 
+  exception_page:
+    git: https://github.com/crystal-loot/exception_page.git
+    version: 0.1.4
+
   humanize_time:
     git: https://github.com/mamantoha/humanize_time.git
     version: 0.7.0
@@ -24,6 +28,14 @@ shards:
     git: https://github.com/crystal-lang/json_mapping.cr.git
     version: 0.1.0
 
+  kemal:
+    git: https://github.com/kemalcr/kemal.git
+    version: 0.26.1+git.commit.a819d4792bbc63d993d6dd2b15f9af5efb0c2d8c
+
+  kilt:
+    git: https://github.com/jeromegn/kilt.git
+    version: 0.4.0
+
   micrate:
     git: https://github.com/amberframework/micrate.git
     version: 0.8.0
@@ -31,4 +43,8 @@ shards:
   pg:
     git: https://github.com/will/crystal-pg.git
     version: 0.21.1
+
+  radix:
+    git: https://github.com/luislavena/radix.git
+    version: 0.3.9
 
