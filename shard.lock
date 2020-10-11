@@ -16,6 +16,10 @@ shards:
     git: https://github.com/crystal-loot/exception_page.git
     version: 0.1.4
 
+  graphql:
+    git: https://github.com/graphql-crystal/graphql.git
+    version: 0.3.0
+
   humanize_time:
     git: https://github.com/mamantoha/humanize_time.git
     version: 0.7.0

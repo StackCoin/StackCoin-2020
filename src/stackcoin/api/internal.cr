@@ -1,6 +1,11 @@
 require "http/server"
 
 class StackCoin::Api::Internal
+end
+
+require "./internal/*"
+
+class StackCoin::Api::Internal
   def self.run!
     server = HTTP::Server.new do |context|
       resource = context.request.resource

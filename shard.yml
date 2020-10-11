@@ -35,4 +35,7 @@ dependencies:
     github: kemalcr/kemal
     branch: master
 
+  graphql:
+    github: graphql-crystal/graphql
+
 crystal: 0.35.1
