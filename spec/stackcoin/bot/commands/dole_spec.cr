@@ -1,6 +1,7 @@
 require "../../../spec_helper"
 require "../../../../src/stackcoin/bot/command"
 require "../../../../src/stackcoin/core/bank"
+require "../../../../src/stackcoin/core/accounts"
 require "../../../../src/stackcoin/core/stackcoin_reserve_system"
 
 require "../../../../src/stackcoin/bot/commands/dole"
@@ -16,7 +17,7 @@ describe "StackCoin::Bot::Commands::Dole" do
 
       results.size.should eq 2
 
-      results[0].should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
+      results[0].should be_a(StackCoin::Core::Accounts::Result::NewUserAccount)
       results[1].should be_a(StackCoin::Core::StackCoinReserveSystem::Result::EmptyReserves)
     end
   end
@@ -34,7 +35,7 @@ describe "StackCoin::Bot::Commands::Dole" do
 
       results.size.should eq 2
 
-      results[0].should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
+      results[0].should be_a(StackCoin::Core::Accounts::Result::NewUserAccount)
       results[1].should be_a(StackCoin::Core::StackCoinReserveSystem::Result::GivenDole)
 
       second_result = results[1].as(StackCoin::Core::StackCoinReserveSystem::Result::GivenDole)

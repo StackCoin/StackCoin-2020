@@ -1,6 +1,6 @@
 require "../../../spec_helper"
 require "../../../../src/stackcoin/bot/command"
-require "../../../../src/stackcoin/core/bank"
+require "../../../../src/stackcoin/core/accounts"
 
 require "../../../../src/stackcoin/bot/commands/open"
 
@@ -9,8 +9,8 @@ describe "StackCoin::Bot::Commands::Open" do
     open = StackCoin::Bot::Commands::Open.new
     rollback_once_finished do |tx|
       result = Actor::NINT.say("s!open", open)
-      result.should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
-      result = result.as(StackCoin::Core::Bank::Result::NewUserAccount)
+      result.should be_a(StackCoin::Core::Accounts::Result::NewUserAccount)
+      result = result.as(StackCoin::Core::Accounts::Result::NewUserAccount)
 
       result.new_user_id.should eq Actor::NINT.id(tx)
       Actor::NINT.admin(tx).should be_false
@@ -21,10 +21,10 @@ describe "StackCoin::Bot::Commands::Open" do
     open = StackCoin::Bot::Commands::Open.new
     rollback_once_finished do |tx|
       initial_result = Actor::NINT.say("s!open", open)
-      initial_result = initial_result.as(StackCoin::Core::Bank::Result::NewUserAccount)
+      initial_result = initial_result.as(StackCoin::Core::Accounts::Result::NewUserAccount)
 
       result = Actor::NINT.say("s!open", open)
-      result.should be_a(StackCoin::Core::Bank::Result::PreExistingUserAccount)
+      result.should be_a(StackCoin::Core::Accounts::Result::PreExistingUserAccount)
     end
   end
 
@@ -33,8 +33,8 @@ describe "StackCoin::Bot::Commands::Open" do
     rollback_once_finished do |tx|
       result = Actor::JACK.say("s!open", open)
 
-      result.should be_a(StackCoin::Core::Bank::Result::NewUserAccount)
-      result = result.as(StackCoin::Core::Bank::Result::NewUserAccount)
+      result.should be_a(StackCoin::Core::Accounts::Result::NewUserAccount)
+      result = result.as(StackCoin::Core::Accounts::Result::NewUserAccount)
 
       result.new_user_id.should eq Actor::JACK.id(tx)
       Actor::JACK.admin(tx).should be_true

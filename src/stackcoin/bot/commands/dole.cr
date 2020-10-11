@@ -21,10 +21,10 @@ class StackCoin::Bot::Commands
         potential_id = user_id_from_snowflake(cnn, author.id)
 
         if !potential_id
-          result = Core::Bank.open(tx, author.id, author.username, author.avatar_url)
+          result = Core::Accounts.open(tx, author.id, author.username, author.avatar_url)
           results << result
 
-          if result.is_a?(Core::Bank::Result::NewUserAccount)
+          if result.is_a?(Core::Accounts::Result::NewUserAccount)
             potential_id = result.new_user_id
           else
             next

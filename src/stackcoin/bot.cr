@@ -5,8 +5,8 @@ require "discordcr"
 class StackCoin::Bot
 end
 
-require "./bot/parser.cr"
-require "./bot/command.cr"
+require "./bot/parser"
+require "./bot/command"
 require "./bot/commands/*"
 
 class StackCoin::Bot

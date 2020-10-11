@@ -15,7 +15,7 @@ class StackCoin::Bot::Commands
       author = message.author
       result = nil
       DB.transaction do |tx|
-        result = Core::Bank.open(tx, author.id, author.username, author.avatar_url)
+        result = Core::Accounts.open(tx, author.id, author.username, author.avatar_url)
       end
       result = result.as(Result::Base)
 
