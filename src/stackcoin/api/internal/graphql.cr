@@ -26,4 +26,12 @@ class StackCoin::Api::Internal::Gql
   def self.schema
     GraphQL::Schema.new(Query.new, Mutation.new)
   end
+
+  class SchemaExecuteInput
+    include JSON::Serializable
+
+    getter query : String
+    getter variables : Hash(String, JSON::Any)?
+    getter operation_name : String?
+  end
 end

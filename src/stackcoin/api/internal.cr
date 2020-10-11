@@ -6,21 +6,29 @@ end
 require "./internal/*"
 
 class StackCoin::Api::Internal
+  def self.not_found(r)
+    r.status_code = 404
+    r.content_type = "text/plain"
+    r.print("Not found")
+  end
+
   def self.run!
+    schema = Gql.schema
+
     server = HTTP::Server.new do |context|
       resource = context.request.resource
-
-      puts resource
+      method = context.request.method
 
       r = context.response
+
       case resource
       when "/auth"
-        puts "auth"
-        p context
-        # handle auth
-        # var token = request.get('Authorization');
+        unless method == "GET"
+          next not_found(r)
+        end
 
         if token = context.request.headers["Authorization"]?
+          # TODO handle auth token
           r.status_code = 401
         else
           r.status_code = 200
@@ -31,14 +39,26 @@ class StackCoin::Api::Internal
             }
             JSON
         end
+        next
       when "/graphql"
-        puts "graphql"
-        # handle gql
+        unless method == "POST"
+          next not_found(r)
+        end
+
+        schema_execute_input = Gql::SchemaExecuteInput.from_json(context.request.body.not_nil!.gets_to_end)
+
+        r.content_type = "application/json"
+
+        r.print(schema.execute(
+          schema_execute_input.query,
+          schema_execute_input.variables,
+          schema_execute_input.operation_name
+        ))
+        next
       else
-        r.status_code = 404
-        r.content_type = "text/plain"
-        r.print("Not found")
       end
+
+      not_found(r)
     end
 
     address = server.bind_tcp(4000)
