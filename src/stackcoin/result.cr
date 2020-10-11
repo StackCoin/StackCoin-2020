@@ -3,28 +3,27 @@ class StackCoin::Result
     include JSON::Serializable
 
     getter message : String
+    getter name : String
+    getter success : Bool
 
-    def initialize(@message)
+    def initialize(@message, @success)
+      @name = generate_name
     end
 
-    def name
+    def generate_name
       self.class.name.split("::").last(1)[0]
     end
   end
 
   class Success < Base
-    getter success : String
-
-    def initialize(@message)
-      @success = name
+    def initialize(message)
+      super(message, true)
     end
   end
 
   class Failure < Base
-    getter failure : String
-
-    def initialize(@message)
-      @failure = name
+    def initialize(message)
+      super(message, false)
     end
   end
 end
