@@ -10,17 +10,36 @@ class StackCoin::Core::Accounts
       end
     end
 
+    class OneTimeLink < Success
+      getter link : String
+
+      def initialize(message, @link)
+        super(message)
+      end
+    end
+
+
     class NoSuchUserAccount < Failure
     end
 
     class PreExistingUserAccount < Failure
     end
 
-   class BannedUser < Failure
+    class BannedUser < Failure
     end
   end
 
-  def self.open(tx : ::DB::Transaction, username, avatar_url, admin)
+  def self.one_time_link(tx : ::DB::Transaction, user_id : Int32?)
+    unless user_id.is_a?(Int32)
+      return Result::NoSuchUserAccount.new("No user account to login to")
+    end
+
+    link = "http://foo"
+
+    Result::OneTimeLink.new("One time link generated", link)
+  end
+
+  def self.open(tx : ::DB::Transaction, username : String, avatar_url : String, admin : Bool)
     cnn = tx.connection
 
     now = Time.utc

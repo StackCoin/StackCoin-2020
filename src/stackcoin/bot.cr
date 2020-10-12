@@ -62,6 +62,7 @@ class StackCoin::Bot
       Commands::Dole.new,
       Commands::Graph.new,
       Commands::Leaderboard.new,
+      Commands::Login.new,
       Commands::Open.new,
       Commands::Profile.new,
       Commands::Pump.new,
