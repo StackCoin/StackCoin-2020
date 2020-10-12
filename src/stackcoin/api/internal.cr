@@ -1,11 +1,17 @@
 require "http/server"
 
-class StackCoin::Api::Internal < StackCoin::Api
+class StackCoin::Api::Internal
 end
 
 require "./internal/*"
 
-class StackCoin::Api::Internal < StackCoin::Api
+class StackCoin::Api::Internal
+  def self.not_found(r)
+    r.status_code = 404
+    r.content_type = "text/plain"
+    r.print("Not found")
+  end
+
   class SchemaExecuteInput
     include JSON::Serializable
 

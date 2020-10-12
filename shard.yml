@@ -38,4 +38,7 @@ dependencies:
   graphql:
     github: graphql-crystal/graphql
 
+  runcobo:
+    github: runcobo/runcobo
+
 crystal: 0.35.1

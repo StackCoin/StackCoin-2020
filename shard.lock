@@ -28,6 +28,10 @@ shards:
     git: https://github.com/TechMagister/i18n.cr.git
     version: 0.3.1+git.commit.635e05dd5e9fb8bc99c46c12497689221644d9e4
 
+  jbuilder:
+    git: https://github.com/shootingfly/jbuilder.git
+    version: 0.3.0
+
   json_mapping:
     git: https://github.com/crystal-lang/json_mapping.cr.git
     version: 0.1.0
@@ -51,4 +55,12 @@ shards:
   radix:
     git: https://github.com/luislavena/radix.git
     version: 0.3.9
+
+  runcobo:
+    git: https://github.com/runcobo/runcobo.git
+    version: 1.0.0
+
+  water:
+    git: https://github.com/shootingfly/water.git
+    version: 0.3.0
 

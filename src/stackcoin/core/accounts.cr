@@ -1,6 +1,32 @@
 require "../result"
 
 class StackCoin::Core::Accounts
+  class SessionStore
+    class Session
+      property user_id : Int32
+      property expires_at : Time
+
+      def initialize(@user_id, @expires_at)
+      end
+    end
+
+    # TODO back by database instead of in memory eventually
+    class_property in_memory_session_store : Hash(String, Session?) = {} of String => Session?
+
+    def self.create(user_id : Int32, valid_for : Time::Span = 2.days)
+      now = Time.utc
+      expires_at = now + valid_for
+
+      id = Random::Secure.hex
+
+      session = Session.new(user_id, expires_at)
+
+      in_memory_session_store[id] = session
+
+      {id, session}
+    end
+  end
+
   class Result < StackCoin::Result
     class NewUserAccount < Success
       getter new_user_id : Int32
@@ -18,7 +44,6 @@ class StackCoin::Core::Accounts
       end
     end
 
-
     class NoSuchUserAccount < Failure
     end
 
@@ -33,6 +58,8 @@ class StackCoin::Core::Accounts
     unless user_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("No user account to login to")
     end
+
+    SessionStore.create(user_id)
 
     link = "http://foo"
 
