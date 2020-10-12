@@ -1,15 +1,18 @@
 require "http/server"
 
-class StackCoin::Api::External
+class StackCoin::Api::External < StackCoin::Api
   def self.run!
     server = HTTP::Server.new do |context|
       resource = context.request.resource
-
-      puts resource
+      method = context.request.method
 
       r = context.response
       case resource
       when "/discord-oauth"
+        unless method == "GET"
+          next not_found(r)
+        end
+
         p "handle discord oauth"
       else
         r.status_code = 404

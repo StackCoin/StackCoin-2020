@@ -13,7 +13,9 @@ module StackCoin
     # TODO nuke_and_populate_hasura_things
     run_migrations
 
-    Api.run
+    spawn(Api::External.run!)
+    spawn(Api::Internal.run!)
+
     # spawn(Bot.run!)
 
     loop do

@@ -8,6 +8,12 @@ class StackCoin::Api::Internal::Gql
     include GraphQL::ObjectType
 
     def initialize(result)
+      @message = result.message
+      @name = result.name
+      @success = result.success
+      @transaction_id = result.transaction_id
+      @from_user_balance = result.from_user_balance
+      @to_user_balance= result.to_user_balance
     end
 
     @[GraphQL::Field]
@@ -41,6 +47,14 @@ class StackCoin::Api::Internal::Gql
     end
   end
 
+  class Context < GraphQL::Context
+    getter user_id : Int32?
+    getter role : String?
+
+    def initialize(@user_id, @role)
+    end
+  end
+
   @[GraphQL::Object]
   class Query
     include GraphQL::ObjectType
@@ -58,9 +72,12 @@ class StackCoin::Api::Internal::Gql
     include GraphQL::MutationType
 
     @[GraphQL::Field]
-    def send(id : Int32, amount : Int32) : SuccessfulTransaction
-      # TODO auth, set this value based on the input header
-      from_id = 1
+    def send(context : Context, id : Int32, amount : Int32) : SuccessfulTransaction
+      unless context.user_id.is_a?(Int32)
+        raise "Not authorized"
+      end
+
+      from_id = context.user_id
 
       result = nil
       DB.transaction do |tx|
@@ -78,13 +95,5 @@ class StackCoin::Api::Internal::Gql
 
   def self.schema
     GraphQL::Schema.new(Query.new, Mutation.new)
-  end
-
-  class SchemaExecuteInput
-    include JSON::Serializable
-
-    getter query : String
-    getter variables : Hash(String, JSON::Any)?
-    getter operation_name : String?
   end
 end

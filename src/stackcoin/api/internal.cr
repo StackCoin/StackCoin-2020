@@ -1,15 +1,17 @@
 require "http/server"
 
-class StackCoin::Api::Internal
+class StackCoin::Api::Internal < StackCoin::Api
 end
 
 require "./internal/*"
 
-class StackCoin::Api::Internal
-  def self.not_found(r)
-    r.status_code = 404
-    r.content_type = "text/plain"
-    r.print("Not found")
+class StackCoin::Api::Internal < StackCoin::Api
+  class SchemaExecuteInput
+    include JSON::Serializable
+
+    getter query : String
+    getter variables : Hash(String, JSON::Any)?
+    getter operation_name : String?
   end
 
   def self.run!
@@ -29,7 +31,16 @@ class StackCoin::Api::Internal
 
         if token = context.request.headers["Authorization"]?
           # TODO handle auth token
-          r.status_code = 401
+          # r.status_code = 401
+
+          r.status_code = 200
+          r.content_type = "application/json"
+          r.print(<<-JSON)
+            {
+              "X-Hasura-Role": "user",
+              "X-Hasura-User-ID": "1"
+            }
+            JSON
         else
           r.status_code = 200
           r.content_type = "application/json"
@@ -45,14 +56,27 @@ class StackCoin::Api::Internal
           next not_found(r)
         end
 
-        schema_execute_input = Gql::SchemaExecuteInput.from_json(context.request.body.not_nil!.gets_to_end)
+        headers = context.request.headers
+
+        user_id = if header = headers["X-Hasura-User-ID"]?
+                    header.to_i?
+                  else
+                    nil
+                  end
+
+        role = headers["X-Hasura-Role"]?
+
+        c = Gql::Context.new(user_id, role)
+
+        schema_execute_input = SchemaExecuteInput.from_json(context.request.body.not_nil!.gets_to_end)
 
         r.content_type = "application/json"
 
         r.print(schema.execute(
           schema_execute_input.query,
           schema_execute_input.variables,
-          schema_execute_input.operation_name
+          schema_execute_input.operation_name,
+          c
         ))
         next
       else

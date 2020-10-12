@@ -1,13 +1,11 @@
 require "http/server"
 
-class StackCoin::Api
+abstract class StackCoin::Api
+  def self.not_found(r)
+    r.status_code = 404
+    r.content_type = "text/plain"
+    r.print("Not found")
+  end
 end
 
 require "./api/*"
-
-class StackCoin::Api
-  def self.run
-    spawn(External.run!)
-    spawn(Internal.run!)
-  end
-end
