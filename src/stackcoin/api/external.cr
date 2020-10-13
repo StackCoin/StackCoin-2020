@@ -20,14 +20,16 @@ class StackCoin::Api::External::Auth < BaseAction
       # domain: Session.config.domain, # TODO configure
     )
 
-    p cookie
+    # p cookie
 
     # context.response.cookies << cookie
 
-    one_time_key = params[:one_time_key]
-    p one_time_key
-
-    render_plain("Hello, world!")
+    if one_time_key = params[:one_time_key]
+      result = Core::SessionStore.upgrade_one_time_to_real_session(one_time_key)
+      render_plain(result)
+    else
+      render_plain("~")
+    end
   end
 end
 
