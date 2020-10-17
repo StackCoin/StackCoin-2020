@@ -33,8 +33,7 @@ class StackCoin::Core::Accounts
       return Result::NoSuchUserAccount.new("No user account to login to")
     end
 
-    valid_for = 10.minutes
-
+    valid_for = Core::SessionStore::TINY_SESSION_LENGTH
     id = Core::SessionStore.create(user_id, valid_for, one_time_use: true)
     link = Core::SessionStore::Session.one_time_link(id)
 

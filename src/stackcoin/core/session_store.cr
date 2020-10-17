@@ -18,7 +18,7 @@ class StackCoin::Core::SessionStore
     end
   end
 
-  TINY_SESSION_LENGTH = 1.minutes
+  TINY_SESSION_LENGTH    = 5.minutes
   REGULAR_SESSION_LENGTH = 2.days
 
   # TODO back by database instead of in memory eventually
@@ -35,6 +35,20 @@ class StackCoin::Core::SessionStore
     def self.one_time_link(id)
       URI.encode("#{STACKCOIN_SITE_BASE}/auth?one_time_key=#{id}")
     end
+
+    def self.to_cookie(id)
+      session = in_memory_session_store[id]
+
+      HTTP::Cookie.new(
+        name: STACKCOIN_SITE_COOKIE,
+        value: id,
+        expires: session.expires,
+        http_only: true,
+        secure: !DEV_MODE,
+        path: "/",
+        domain: STACKCOIN_SITE_DOMAIN,
+      )
+    end
   end
 
   def self.create(user_id : Int32, valid_for : Time::Span, one_time_use : Bool = false)
@@ -47,17 +61,17 @@ class StackCoin::Core::SessionStore
 
     in_memory_session_store[id] = session
 
-    id
+    {id, session}
   end
 
   def self.create_new_from_existing(existing_session_key : String, valid_for : Time::Span)
-    # validate old
     is_old_session_valid = self.is_session_still_valid(existing_session_key)
 
     unless is_old_session_valid
+      return Result::InvalidSession.new("Invalid session, cannot upgrade")
     end
 
-    # create new
+    SessionStore.create(user_id, valid_for, one_time_use: true)
 
     # invalidate existing
   end

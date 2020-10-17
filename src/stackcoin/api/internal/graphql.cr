@@ -13,7 +13,7 @@ class StackCoin::Api::Internal::Gql
       @success = result.success
       @transaction_id = result.transaction_id
       @from_user_balance = result.from_user_balance
-      @to_user_balance= result.to_user_balance
+      @to_user_balance = result.to_user_balance
     end
 
     @[GraphQL::Field]

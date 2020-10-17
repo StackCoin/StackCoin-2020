@@ -50,4 +50,3 @@ class StackCoin::Bot::Commands
     end
   end
 end
-

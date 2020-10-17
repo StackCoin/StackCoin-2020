@@ -11,7 +11,7 @@ class StackCoin::Bot::Commands
     end
 
     def invoke(message, parsed)
-      page = 0 #O TODO
+      page = 0 # O TODO
 
       offset = (page - 1) * LIMIT
 
@@ -23,22 +23,22 @@ class StackCoin::Bot::Commands
 
       fields = [] of Discord::EmbedField
 
-      #result.entries.each_with_index do |entry, index|
+      # result.entries.each_with_index do |entry, index|
       #  fields << Discord::EmbedField.new(
       #    name: "\##{offset + index + 1}: #{entry.username}",
       #    value: "Balance: #{entry.balance} STK",
       #  )
-      #end
+      # end
 
-      #fields << Discord::EmbedField.new(
+      # fields << Discord::EmbedField.new(
       # name: "*crickets*",
       #  value: "No users found on page #{page}, maybe try a smaller number?"
-      #) if fields.size == 0
+      # ) if fields.size == 0
 
-      #send_embed(message, Discord::Embed.new(
+      # send_embed(message, Discord::Embed.new(
       #  title: "_Leaderboard:_",
       #  fields: fields
-      #))
+      # ))
 
       send_message(message, "TODO")
     end

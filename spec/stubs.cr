@@ -23,6 +23,7 @@ end
 
 class MockClient
   INSTANCE = new
+
   # TODO class_property current_guild = CSBOIS_GUILD_SNOWFLAKE
 
   def create_message(channel_id : Discord::Snowflake, content : String)
