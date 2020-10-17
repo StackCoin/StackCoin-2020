@@ -1,5 +1,4 @@
 require "../result"
-require "uri"
 
 class StackCoin::Core::Accounts
   class Result < StackCoin::Result
@@ -37,8 +36,7 @@ class StackCoin::Core::Accounts
     valid_for = 10.minutes
 
     id = Core::SessionStore.create(user_id, valid_for, one_time_use: true)
-
-    link = URI.encode("#{STACKCOIN_SITE_BASE}/auth?one_time_key=#{id}")
+    link = Core::SessionStore::Session.one_time_link(id)
 
     Result::OneTimeLink.new("One time link generated", link)
   end
