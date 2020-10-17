@@ -32,11 +32,11 @@ class StackCoin::Core::SessionStore
     def initialize(@user_id : Int32, @expires_at : Time, @one_time_use : Bool = false)
     end
 
-    def self.one_time_link(id)
+    def self.one_time_link(id : String)
       URI.encode("#{STACKCOIN_SITE_BASE}/auth?one_time_key=#{id}")
     end
 
-    def self.to_cookie(id)
+    def self.to_cookie(id : String)
       session = in_memory_session_store[id]
 
       HTTP::Cookie.new(
@@ -51,7 +51,7 @@ class StackCoin::Core::SessionStore
     end
   end
 
-  def self.create(user_id : Int32, valid_for : Time::Span, one_time_use : Bool = false)
+  def self.create(user_id : Int32, valid_for : Time::Span, one_time_use : Bool = false) : Tuple(String, Session)
     now = Time.utc
     expires_at = now + valid_for
 
@@ -64,23 +64,25 @@ class StackCoin::Core::SessionStore
     {id, session}
   end
 
-  def self.create_new_from_existing(existing_session_key : String, valid_for : Time::Span)
+  def self.create_new_from_existing(existing_session : Session, valid_for : Time::Span) : Result
     is_old_session_valid = self.is_session_still_valid(existing_session_key)
 
     unless is_old_session_valid
       return Result::InvalidSession.new("Invalid session, cannot upgrade")
     end
 
-    SessionStore.create(user_id, valid_for, one_time_use: true)
+    new_sesion_tuple = SessionStore.create(user_id, valid_for, one_time_use: true)
 
-    # invalidate existing
+    in_memory_session_store.delete(one_time_key)
+
+    return Result::NewSession.new("New session generated", new_session_id: id)
   end
 
-  private def self.is_session_still_valid(session : Session)
+  private def self.is_session_still_valid(session : Session) : Bool
     session.expires_at < Time.utc
   end
 
-  private def self.is_session_still_valid(session_key : String)
+  private def self.is_session_still_valid(session_key : String) : Bool
     if session = in_memory_session_store[one_time_key]?
       is_session_still_valid(session)
     else
@@ -88,17 +90,13 @@ class StackCoin::Core::SessionStore
     end
   end
 
-  def self.upgrade_one_time_to_real_session(one_time_key : String)
+  def self.upgrade_one_time_to_real_session(one_time_key : String) : Result
     if session = in_memory_session_store[one_time_key]?
       unless session.one_time_use
         Result::InvalidOneTimeUpgrade.new("Can't upgrade a session that's already a non-one-time-use session to a new session")
       end
 
-      in_memory_session_store.delete(one_time_key)
-
-      id = 1 # TODO generate new session
-
-      return Result::NewSession.new("New session generated", new_session_id: id)
+      return self.create_new_from_existing(session, valid_for: REGULAR_SESSION_LENGTH)
     else
       return Result::InvalidSession.new("Invalid session, cannot upgrade")
     end

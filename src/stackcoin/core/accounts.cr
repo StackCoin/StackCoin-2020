@@ -34,7 +34,7 @@ class StackCoin::Core::Accounts
     end
 
     valid_for = Core::SessionStore::TINY_SESSION_LENGTH
-    id = Core::SessionStore.create(user_id, valid_for, one_time_use: true)
+    id, session = Core::SessionStore.create(user_id, valid_for, one_time_use: true)
     link = Core::SessionStore::Session.one_time_link(id)
 
     Result::OneTimeLink.new("One time link generated", link)
