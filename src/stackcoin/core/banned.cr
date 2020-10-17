@@ -19,7 +19,7 @@ class StackCoin::Core::Banned
     end
   end
 
-  def self.ban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?)
+  def self.ban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?) : Result::Base
     unless invokee_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("You doesn't have a user account")
     end
@@ -53,7 +53,7 @@ class StackCoin::Core::Banned
     Result::UserBanned.new("User is now banned")
   end
 
-  def self.unban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?)
+  def self.unban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?) : Result::Base
     unless invokee_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("You doesn't have a user account")
     end
@@ -87,8 +87,8 @@ class StackCoin::Core::Banned
     Result::UserUnbanned.new("User is now unbanned")
   end
 
-  def self.is_banned(cnn : ::DB::Connection, user_id : Int32?)
-    cnn.query_one(<<-SQL, user_id, as: Bool)
+  def self.is_banned(cnn : ::DB::Connection, user_id : Int32?) : Bool?
+    cnn.query_one?(<<-SQL, user_id, as: Bool)
       SELECT banned FROM "user" WHERE id = $1
       SQL
   end

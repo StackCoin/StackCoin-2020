@@ -45,7 +45,7 @@ class StackCoin::Core::Info
     end
   end
 
-  def self.circulation(cnn : ::DB::Connection)
+  def self.circulation(cnn : ::DB::Connection) : Result::Circulation
     amount = cnn.query_one(<<-SQL, as: Int64)
       SELECT SUM(balance) FROM "user"
       SQL
@@ -56,7 +56,7 @@ class StackCoin::Core::Info
     )
   end
 
-  def self.leaderboard(cnn : ::DB::Connection, limit : Int32 = 5, offset : Int32 = 0)
+  def self.leaderboard(cnn : ::DB::Connection, limit : Int32 = 5, offset : Int32 = 0) : Result::Leaderboard
     entries = Result::Leaderboard::Entry.from_rs(cnn.query(<<-SQL, limit, offset))
       SELECT username, balance FROM "user"
       ORDER BY balance DESC LIMIT $1 OFFSET $2
@@ -65,7 +65,7 @@ class StackCoin::Core::Info
     Result::Leaderboard.new("Rankings, limited by #{limit} and offsetted by #{offset}", entries: entries)
   end
 
-  def self.profile(cnn : ::DB::Connection, user_id : Int32?)
+  def self.profile(cnn : ::DB::Connection, user_id : Int32?) : Result::Base
     unless user_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("No user account to check profile of")
     end

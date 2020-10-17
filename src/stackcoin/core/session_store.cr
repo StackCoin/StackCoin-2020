@@ -64,7 +64,7 @@ class StackCoin::Core::SessionStore
     {id, session}
   end
 
-  def self.create_new_from_existing(existing_session : Session, valid_for : Time::Span) : Result
+  def self.create_new_from_existing(existing_session : Session, valid_for : Time::Span) : Result::Base
     is_old_session_valid = self.is_session_still_valid(existing_session_key)
 
     unless is_old_session_valid
@@ -90,7 +90,7 @@ class StackCoin::Core::SessionStore
     end
   end
 
-  def self.upgrade_one_time_to_real_session(one_time_key : String) : Result
+  def self.upgrade_one_time_to_real_session(one_time_key : String) : Result::Base
     if session = in_memory_session_store[one_time_key]?
       unless session.one_time_use
         Result::InvalidOneTimeUpgrade.new("Can't upgrade a session that's already a non-one-time-use session to a new session")

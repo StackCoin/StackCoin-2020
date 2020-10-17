@@ -26,7 +26,7 @@ class StackCoin::Core::Graph
     getter amount : Int32
   end
 
-  def self.balance_over_time(cnn : ::DB::Connection, user_id : Int32?)
+  def self.balance_over_time(cnn : ::DB::Connection, user_id : Int32?) : Result::Base
     unless user_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("No user account to graph")
     end

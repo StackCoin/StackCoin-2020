@@ -38,7 +38,7 @@ class StackCoin::Core::Bank
 
   MAX_TRANSFER_AMOUNT = 100000
 
-  def self.transfer(tx : ::DB::Transaction, from_user_id : Int32?, to_user_id : Int32?, amount : Int32, label : String? = nil)
+  def self.transfer(tx : ::DB::Transaction, from_user_id : Int32?, to_user_id : Int32?, amount : Int32, label : String? = nil) : Result::Base
     unless from_user_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("You don't have an user account yet")
     end
@@ -110,7 +110,7 @@ class StackCoin::Core::Bank
     )
   end
 
-  def self.balance(cnn : ::DB::Connection, user_id : Int32?)
+  def self.balance(cnn : ::DB::Connection, user_id : Int32?) : Result::Base
     unless user_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("No user account to check the balance of")
     end

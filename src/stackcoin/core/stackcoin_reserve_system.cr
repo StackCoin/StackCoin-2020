@@ -43,7 +43,7 @@ class StackCoin::Core::StackCoinReserveSystem
 
   class_getter stackcoin_reserve_system_user_id : Int32? = nil
 
-  def self.stackcoin_reserve_system_user(cnn : ::DB::Connection)
+  def self.stackcoin_reserve_system_user(cnn : ::DB::Connection) : Int32
     if stackcoin_reserve_system_user_id = @@stackcoin_reserve_system_user_id
       return stackcoin_reserve_system_user_id
     else
@@ -55,7 +55,7 @@ class StackCoin::Core::StackCoinReserveSystem
     end
   end
 
-  def self.pump(tx : ::DB::Transaction, signee_id : Int32?, amount : Int32, label : String)
+  def self.pump(tx : ::DB::Transaction, signee_id : Int32?, amount : Int32, label : String) : Result::Base
     unless signee_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("You don't have an user account to pump the StackCoin Reserve System with yet")
     end
@@ -106,7 +106,7 @@ class StackCoin::Core::StackCoinReserveSystem
     )
   end
 
-  def self.dole(tx : ::DB::Transaction, to_user_id : Int32?)
+  def self.dole(tx : ::DB::Transaction, to_user_id : Int32?) : Result::Base
     unless to_user_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("You don't have an user account to deposit dole to yet")
     end

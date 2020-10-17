@@ -28,7 +28,7 @@ class StackCoin::Core::Accounts
     end
   end
 
-  def self.one_time_link(tx : ::DB::Transaction, user_id : Int32?)
+  def self.one_time_link(tx : ::DB::Transaction, user_id : Int32?) : Result::Base
     unless user_id.is_a?(Int32)
       return Result::NoSuchUserAccount.new("No user account to login to")
     end
@@ -40,7 +40,7 @@ class StackCoin::Core::Accounts
     Result::OneTimeLink.new("One time link generated", link)
   end
 
-  def self.open(tx : ::DB::Transaction, username : String, avatar_url : String, admin : Bool)
+  def self.open(tx : ::DB::Transaction, username : String, avatar_url : String, admin : Bool) : Result::Base
     cnn = tx.connection
 
     now = Time.utc
@@ -64,7 +64,7 @@ class StackCoin::Core::Accounts
     Result::NewUserAccount.new("User account created", user_id)
   end
 
-  def self.open(tx : ::DB::Transaction, discord_snowflake : Discord::Snowflake, username : String, avatar_url : String)
+  def self.open(tx : ::DB::Transaction, discord_snowflake : Discord::Snowflake, username : String, avatar_url : String) : Result::Base
     now = Time.utc
     admin = false
 
