@@ -1,25 +1,19 @@
 require "../../spec_helper"
 require "../../../src/stackcoin/core/session_store"
-require "../../../src/stackcoin/core/accounts"
-
-require "../../../src/stackcoin/bot/command"
-require "../../../src/stackcoin/bot/commands/open"
 
 describe "StackCoin::Core::SessionStore" do
-  it "is able to generate a one-time-link that contains the session id at the end of said link" do
-    open = StackCoin::Bot::Commands::Open.new
-    rollback_once_finished do |tx|
-      Actor::JACK.say("s!open", open)
+  [
+    {0, 1.minute, false},
+    {10, 2.minute, true},
+    {99, 10.hours, false},
+  ].each do |user_id, valid_for, one_time_use|
+    it "generates a session token with a user_id of #{user_id}, valid_for of #{valid_for}, one_time_use of #{one_time_use}" do
+      rollback_once_finished do |tx|
+        id, session = StackCoin::Core::SessionStore.create(user_id, valid_for, one_time_use)
 
-      user_id = Actor::JACK.id(tx)
-
-      result = StackCoin::Core::Accounts.one_time_link(tx, user_id)
-
-      result.should be_a(StackCoin::Core::Accounts::Result::OneTimeLink)
-      result = result.as(StackCoin::Core::Accounts::Result::OneTimeLink)
-
-      result.link.should end_with result.session_id
-      result.session.one_time_use.should be_true
+        session.user_id.should eq user_id
+        session.one_time_use.should eq one_time_use
+      end
     end
   end
 end
