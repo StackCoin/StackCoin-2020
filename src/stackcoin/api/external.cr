@@ -11,8 +11,6 @@ class StackCoin::Api::External::Auth < BaseAction
   query NamedTuple(one_time_key: String?)
 
   call do |context|
-    expires = Time.utc + 2.days
-
     if one_time_key = params[:one_time_key]
       result = Core::SessionStore.upgrade_one_time_to_real_session(one_time_key)
 
@@ -27,5 +25,14 @@ class StackCoin::Api::External::Auth < BaseAction
     else
       render_plain("~") # TODO maybe redirect to login?
     end
+  end
+end
+
+class StackCoin::Api::External::Default < BaseAction
+  get "/"
+  get "/*"
+
+  call do |context|
+    render_plain("...")
   end
 end
