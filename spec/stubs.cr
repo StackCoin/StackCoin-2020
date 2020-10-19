@@ -21,6 +21,13 @@ record MessageWithEmbedStub, channel_id : Discord::Snowflake, guild_id : Discord
   end
 end
 
+record DMStub, id : Discord::Snowflake do
+  def self.new(id)
+    id = Discord::Snowflake.new(id.to_u64)
+    new(id)
+  end
+end
+
 class MockClient
   INSTANCE = new
 
@@ -32,6 +39,10 @@ class MockClient
 
   def create_message(channel_id : Discord::Snowflake, content : String, embed : Discord::Embed)
     # TODO MessageWithEmbedStub.new(channel_id, @@current_guild, content, embed)
+  end
+
+  def create_dm(user_id : Discord::Snowflake)
+    DMStub.new(0_u64)
   end
 end
 

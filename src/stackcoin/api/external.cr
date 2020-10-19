@@ -1,6 +1,9 @@
 require "runcobo"
 
 class StackCoin::Api::External
+  def self.run!
+    Runcobo.start
+  end
 end
 
 class StackCoin::Api::External::Auth < BaseAction
@@ -14,7 +17,7 @@ class StackCoin::Api::External::Auth < BaseAction
       result = Core::SessionStore.upgrade_one_time_to_real_session(one_time_key)
 
       if result.is_a?(Core::SessionStore::Result::NewSession)
-        Core::SessionStore::Session.to_cookie(id)
+        cookie = Core::SessionStore::Session.to_cookie(result.new_session_id)
         context.response.cookies << cookie
 
         render_plain("TODO redirect") # TODO redirect
@@ -24,11 +27,5 @@ class StackCoin::Api::External::Auth < BaseAction
     else
       render_plain("~") # TODO maybe redirect to login?
     end
-  end
-end
-
-class StackCoin::Api::External
-  def self.run!
-    Runcobo.start
   end
 end

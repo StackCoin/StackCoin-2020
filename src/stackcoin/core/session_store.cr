@@ -4,7 +4,7 @@ require "uri"
 class StackCoin::Core::SessionStore
   class Result < StackCoin::Result
     class NewSession < Success
-      getter new_session_id : Int32
+      getter new_session_id : String
 
       def initialize(message, @new_session_id)
         super(message)
@@ -22,7 +22,7 @@ class StackCoin::Core::SessionStore
   REGULAR_SESSION_LENGTH = 2.days
 
   # TODO back by database instead of in memory eventually
-  class_property in_memory_session_store : Hash(String, Session?) = {} of String => Session?
+  class_property in_memory_session_store : Hash(String, Session) = {} of String => Session
 
   class Session
     property user_id : Int32
@@ -37,12 +37,12 @@ class StackCoin::Core::SessionStore
     end
 
     def self.to_cookie(id : String)
-      session = in_memory_session_store[id]
+      session = SessionStore.in_memory_session_store[id]
 
       HTTP::Cookie.new(
-        name: STACKCOIN_SITE_COOKIE,
+        name: STACKCOIN_SITE_COOKIE_NAME,
         value: id,
-        expires: session.expires,
+        expires: session.expires_at,
         http_only: true,
         secure: !DEV_MODE,
         path: "/",
@@ -64,16 +64,16 @@ class StackCoin::Core::SessionStore
     {id, session}
   end
 
-  def self.create_new_from_existing(existing_session : Session, valid_for : Time::Span) : Result::Base
-    is_old_session_valid = self.is_session_still_valid(existing_session_key)
+  def self.create_new_from_existing(existing_session_id : String, existing_session : Session, valid_for : Time::Span) : Result::Base
+    is_old_session_valid = self.is_session_still_valid(existing_session)
 
     unless is_old_session_valid
       return Result::InvalidSession.new("Invalid session, cannot upgrade")
     end
 
-    new_sesion_tuple = SessionStore.create(user_id, valid_for, one_time_use: true)
+    id, session = SessionStore.create(existing_session.user_id, valid_for)
 
-    in_memory_session_store.delete(one_time_key)
+    in_memory_session_store.delete(existing_session_id)
 
     return Result::NewSession.new("New session generated", new_session_id: id)
   end
@@ -96,7 +96,7 @@ class StackCoin::Core::SessionStore
         Result::InvalidOneTimeUpgrade.new("Can't upgrade a session that's already a non-one-time-use session to a new session")
       end
 
-      return self.create_new_from_existing(session, valid_for: REGULAR_SESSION_LENGTH)
+      return self.create_new_from_existing(one_time_key, session, valid_for: REGULAR_SESSION_LENGTH)
     else
       return Result::InvalidSession.new("Invalid session, cannot upgrade")
     end

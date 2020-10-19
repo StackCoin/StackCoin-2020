@@ -12,8 +12,10 @@ class StackCoin::Core::Accounts
 
     class OneTimeLink < Success
       getter link : String
+      getter session_id : String
+      getter session : SessionStore::Session
 
-      def initialize(message, @link)
+      def initialize(message, @link, @session_id, @session)
         super(message)
       end
     end
@@ -37,7 +39,7 @@ class StackCoin::Core::Accounts
     id, session = Core::SessionStore.create(user_id, valid_for, one_time_use: true)
     link = Core::SessionStore::Session.one_time_link(id)
 
-    Result::OneTimeLink.new("One time link generated", link)
+    Result::OneTimeLink.new("One time link generated", link, id, session)
   end
 
   def self.open(tx : ::DB::Transaction, username : String, avatar_url : String, admin : Bool) : Result::Base
