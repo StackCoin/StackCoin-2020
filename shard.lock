@@ -1,20 +1,24 @@
 version: 2.0
 shards:
+  backtracer:
+    git: https://github.com/sija/backtracer.cr.git
+    version: 1.2.1
+
   db:
     git: https://github.com/crystal-lang/crystal-db.git
-    version: 0.9.0
+    version: 0.10.1
 
   discordcr:
-    git: https://github.com/discordcr/discordcr.git
-    version: 0.4.0+git.commit.619e08d31fd10918f2554f7623e2066ac308c439
+    git: https://github.com/shardlab/discordcr.git
+    version: 0.4.0+git.commit.c0adeeacd5ac9e1faba29cc65f4bb1435e4b9865
 
   dotenv:
     git: https://github.com/gdotdesign/cr-dotenv.git
-    version: 0.7.0
+    version: 1.0.0
 
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
-    version: 0.1.4
+    version: 0.2.0
 
   graphql:
     git: https://github.com/graphql-crystal/graphql.git
@@ -22,45 +26,49 @@ shards:
 
   humanize_time:
     git: https://github.com/mamantoha/humanize_time.git
-    version: 0.7.0
+    version: 0.9.0
 
   i18n:
-    git: https://github.com/TechMagister/i18n.cr.git
-    version: 0.3.1+git.commit.635e05dd5e9fb8bc99c46c12497689221644d9e4
+    git: https://github.com/crystal-i18n/i18n.git
+    version: 0.1.4
 
   jbuilder:
     git: https://github.com/shootingfly/jbuilder.git
-    version: 0.3.0
-
-  json_mapping:
-    git: https://github.com/crystal-lang/json_mapping.cr.git
-    version: 0.1.0
+    version: 1.0.0
 
   kemal:
     git: https://github.com/kemalcr/kemal.git
-    version: 0.26.1+git.commit.a819d4792bbc63d993d6dd2b15f9af5efb0c2d8c
+    version: 1.0.0+git.commit.218be2422172d330feb62c6a8abc7df5402fdb84
 
   kilt:
     git: https://github.com/jeromegn/kilt.git
-    version: 0.4.0
+    version: 0.6.1
 
   micrate:
     git: https://github.com/amberframework/micrate.git
-    version: 0.8.0
+    version: 0.10.0
+
+  mysql:
+    git: https://github.com/crystal-lang/crystal-mysql.git
+    version: 0.13.0
 
   pg:
     git: https://github.com/will/crystal-pg.git
-    version: 0.21.1
+    version: 0.23.2
 
   radix:
     git: https://github.com/luislavena/radix.git
-    version: 0.3.9
+    version: 0.4.1
 
   runcobo:
     git: https://github.com/runcobo/runcobo.git
-    version: 1.0.0
+    version: 2.0.0
+
+  sqlite3:
+    git: https://github.com/crystal-lang/crystal-sqlite3.git
+    version: 0.18.0
 
   water:
     git: https://github.com/shootingfly/water.git
-    version: 0.3.0
+    version: 1.0.0
 
