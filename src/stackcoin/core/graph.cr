@@ -33,7 +33,7 @@ class StackCoin::Core::Graph
 
     balance_over_time = BalanceAtTime.from_rs(cnn.query(<<-SQL, user_id))
       SELECT time, to_new_balance, amount FROM "transaction"
-      WHERE to_id = $1 ORDER BY time
+      WHERE to_id = $1 OR from_id = $1 ORDER BY time
       SQL
 
     datapoints = 0
