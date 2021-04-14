@@ -21,7 +21,7 @@ end
 
 class StackCoin::Bot
   OWNER_SNOWFLAKE = Discord::Snowflake.new(178958252820791296)
-  INSTANCE = MockBot.new
+  INSTANCE        = MockBot.new
 end
 
 CSBOIS_GUILD_SNOWFLAKE = Discord::Snowflake.new(497544520695808000)

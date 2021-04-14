@@ -34,6 +34,9 @@ dependencies:
   runcobo:
     github: runcobo/runcobo
 
+  sqlite3:
+    github: crystal-lang/crystal-sqlite3
+
   graphql:
     github: graphql-crystal/graphql
 

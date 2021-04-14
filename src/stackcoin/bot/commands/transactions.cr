@@ -37,7 +37,7 @@ class StackCoin::Bot::Commands
       end
 
       fields << Discord::EmbedField.new(
-      name: "*crickets*",
+        name: "*crickets*",
         value: "No transactions found on page #{page}, maybe try a smaller number?"
       ) if fields.size == 0
 
