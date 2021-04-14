@@ -3,7 +3,6 @@ require "spec"
 require "pg"
 require "micrate"
 require "dotenv"
-require "json_mapping" # TODO remove once deps no longer have usages of JSON.mapping
 require "discordcr"
 
 begin
@@ -49,7 +48,7 @@ db.exec(<<-SQL)
     AND pid <> pg_backend_pid();
 SQL
 
-db.exec("DROP DATABASE #{POSTGRES_DB}")
+db.exec("DROP DATABASE IF EXISTS #{POSTGRES_DB}")
 db.exec("CREATE DATABASE #{POSTGRES_DB}")
 
 db.close

@@ -1,5 +1,3 @@
-require "json_mapping" # TODO remove once deps no longer have usages of JSON.mapping
-
 require "./stackcoin/config"
 require "./stackcoin/db"
 require "./stackcoin/core"
