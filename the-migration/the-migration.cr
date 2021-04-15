@@ -127,41 +127,75 @@ old_benefit = old_db.query_all("select * from benefit", as: OldBenefit)
 old_last_given_dole = old_db.query_all("select * from last_given_dole", as: OldLastGivenDole)
 
 old_balance.each_with_index do |old_balance, index|
+  snowflake = old_balance.user_id
+
+  old_ledger_from = old_ledger.select { |l| l.from_id == snowflake }.sort { |a, b| a.time <=> b.time }
+  old_ledger_to = old_ledger.select { |l| l.to_id == snowflake }.sort { |a, b| a.time <=> b.time }
+  old_benefit_for_user = old_benefit.select { |b| b.user_id == snowflake }.sort { |a, b| a.time <=> b.time }
+
+  first_actions = [
+    old_ledger_from.first?,
+    old_ledger_to.first?,
+    old_benefit_for_user.first?,
+  ].select { |i| !i.nil? }
+
+  first_action = first_actions.sort { |a, b| a.time <=> b.time }.first
+
+  first_known_value = nil
+
+  if first_action.is_a?(OldLedger)
+    if first_action.from_id == snowflake
+      first_known_value = first_action.from_bal + first_action.amount
+    else
+      first_known_value = first_action.to_bal - first_action.amount
+    end
+  else
+    first_known_value = first_action.user_bal - first_action.amount
+  end
+
+  sent = old_ledger_from.sum { |l| l.amount }
+  received = old_ledger_to.sum { |l| l.amount }
+  doled = old_benefit_for_user.sum { |b| b.amount }
+
+  balance = old_balance.bal
+  total = doled + received - sent
+
   id = index # TODO set id based on created_at
 
   # all of these are TODO
   # TODO infer from earliest transaction, EPOCH if special user that had bal before dole was created
   created_at = EPOCH
-  # TODO verify if the balance before and after is the same
-  balance = 0 # old_balance.bal
 
-  cached = cache.discord_users[old_balance.user_id]?
+  cached = cache.discord_users[snowflake]?
 
   if cached.nil?
-    discord_user = discord_cache.resolve_user(old_balance.user_id.to_u64)
+    discord_user = discord_cache.resolve_user(snowflake.to_u64)
     cached = DiscordUser.new(username: discord_user.username, avatar_url: discord_user.avatar_url)
-    cache.discord_users[old_balance.user_id] = cached
+    cache.discord_users[snowflake] = cached
   end
 
   username = cached[:username]
   avatar_url = cached[:avatar_url]
 
-  last_given_dole = old_last_given_dole.find { |u| u.user_id == old_balance.user_id }.not_nil!.time
-  admin = old_balance.user_id == JACKS_SNOWFLAKE.to_s
-  banned = old_banned.includes?(old_balance.user_id)
+  last_given_dole = old_last_given_dole.find { |u| u.user_id == snowflake }.not_nil!.time
+  admin = snowflake == JACKS_SNOWFLAKE.to_s
+  banned = old_banned.includes?(snowflake)
 
   new_user = NewUser.new(
     id, created_at, username, avatar_url, balance, last_given_dole, admin, banned
   )
 
-  last_updated = EPOCH # TODO
-  snowflake = old_balance.user_id
+  last_updated = Time.utc
 
   new_discord_user = NewDiscordUser.new(
     id, last_updated, snowflake
   )
 
-  pp new_user, new_discord_user
+  if total != balance
+    puts "#{username} | sent: #{sent}, received #{received}, doled #{doled} - total #{total} VS. real bal: #{balance} VS. fixed #{total + first_known_value}"
+  end
+
+  # pp new_user, new_discord_user
 end
 
 File.write(CACHE_NAME, cache.to_pretty_json)
