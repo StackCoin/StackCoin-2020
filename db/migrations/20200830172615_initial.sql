@@ -24,8 +24,16 @@ CREATE TABLE "bot_user" (
 
 CREATE TABLE "discord_user" (
   "id" integer PRIMARY KEY references "user"(id),
-  "last_updated" timestamp without time zone not null,
-  "snowflake" text not null UNIQUE
+  "snowflake" text not null UNIQUE,
+  "last_updated" timestamp without time zone not null
+);
+
+CREATE TABLE "discord_guild" (
+  "id" serial PRIMARY KEY,
+  "snowflake" text not null UNIQUE,
+  "name" text not null,
+  "icon_url" text not null,
+  "last_updated" timestamp without time zone not null
 );
 
 CREATE TABLE "transaction" (
@@ -67,6 +75,7 @@ CREATE TABLE "request" (
 WITH stackcoin_reserve_system_user AS (
   INSERT INTO "user"
     (
+      id,
       created_at,
       username,
       avatar_url,
@@ -77,6 +86,7 @@ WITH stackcoin_reserve_system_user AS (
     )
   VALUES
     (
+      1,
       now() at time zone 'utc',
       'StackCoin Reserve System',
       'https://stackcoin.world/assets/default_avatar.png',
