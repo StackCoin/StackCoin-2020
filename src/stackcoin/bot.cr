@@ -63,6 +63,7 @@ class StackCoin::Bot
       Commands::Graph.new,
       Commands::Leaderboard.new,
       Commands::Login.new,
+      Commands::Mark.new,
       Commands::Open.new,
       Commands::Profile.new,
       Commands::Pump.new,
@@ -84,6 +85,8 @@ class StackCoin::Bot
   end
 
   def handle_message(message)
+    # TODO check if designated channel of guild
+
     parsed = Parser.parse(message.content)
 
     return if parsed.nil?
