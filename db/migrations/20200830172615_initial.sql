@@ -33,6 +33,7 @@ CREATE TABLE "discord_guild" (
   "snowflake" text not null UNIQUE,
   "name" text not null,
   "icon_url" text not null,
+  "designated_channel_snowflake" text not null UNIQUE,
   "last_updated" timestamp without time zone not null
 );
 

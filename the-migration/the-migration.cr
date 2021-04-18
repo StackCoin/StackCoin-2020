@@ -9,17 +9,15 @@ begin
   Dotenv.load
 end
 
+alias DiscordGuild = NamedTuple(name: String, icon_url: String)
 alias DiscordUser = NamedTuple(username: String, avatar_url: String)
 
 class Cache
-  property discord_users : Hash(String, DiscordUser)
   include JSON::Serializable
+  property discord_users : Hash(String, DiscordUser) = Hash(String, DiscordUser).new
+  property discord_guilds : Hash(String, DiscordGuild) = Hash(String, DiscordGuild).new
 
-  def initialize(@discord_users)
-  end
-
-  def self.clean
-    new(Hash(String, DiscordUser).new)
+  def initialize
   end
 end
 
@@ -27,16 +25,17 @@ CACHE_NAME  = "./the-migration/cache.json"
 CLEAN_CACHE = false
 
 if CLEAN_CACHE
-  File.write(CACHE_NAME, Cache.clean.to_pretty_json)
+  File.write(CACHE_NAME, Cache.new.to_pretty_json)
 end
 
 cache_file = File.read(CACHE_NAME)
 cache = Cache.from_json(cache_file)
 
-RESERVE_USER_ID =                  1
-DOLE            =                 10
-JACKS_SNOWFLAKE = 178958252820791296
-EPOCH           = Time.unix(1574467200)
+RESERVE_USER_ID    =                  1
+DOLE               =                 10
+JACKS_SNOWFLAKE    = 178958252820791296
+JACKS_CREATED_DATE = Time.unix(1574307000)
+EPOCH              = Time.unix(1574467200)
 
 puts "starting up.."
 
@@ -102,8 +101,22 @@ class NewDiscordUser
   end
 
   property id : Int32?
-  property last_updated : Time
   property snowflake : String
+  property last_updated : Time
+end
+
+class NewDiscordGuild
+  include ::DB::Serializable
+
+  def initialize(@id, @snowflake, @name, @icon_url, @designated_channel_snowflake, @last_updated)
+  end
+
+  property id : Int32
+  property snowflake : String
+  property name : String
+  property icon_url : String
+  property designated_channel_snowflake : String
+  property last_updated : Time
 end
 
 class NewUser
@@ -149,6 +162,20 @@ class NewTransaction
   property label : String?
 end
 
+class NewPump
+  include ::DB::Serializable
+
+  def initialize(@id, @signee_id, @to_id, @to_new_balance, @time, @label)
+  end
+
+  property id : Int32
+  property signee_id : Int32
+  property to_id : Int32
+  property to_new_balance : Int32
+  property time : Time
+  property label : String
+end
+
 puts "quering old_db..."
 
 amount_in_circulation = old_db.query_one(<<-SQL, as: Int64)
@@ -164,6 +191,46 @@ old_benefit = old_db.query_all("select * from benefit", as: OldBenefit)
 old_last_given_dole = old_db.query_all("select * from last_given_dole", as: OldLastGivenDole)
 
 puts "query'd old_db"
+
+GUILD_MAP = {
+  "497544520695808000" => {id: 1}, # compsci bois
+  "72070136256794624"  => {id: 2}, # jke
+  "512319868880551946" => {id: 3}, # compsci bys
+  "510914895001157632" => {id: 4}, # cheesetown
+  "411709413913788419" => {id: 5}, # lads
+  "689213612362825778" => {id: 6}, # colane giftware
+  "733961738742923314" => {id: 7}, # mun casual
+  "742212655884009605" => {id: 8}, # pog bunker
+  "629418589715300412" => {id: 9}, # the rock
+}
+
+new_discord_guilds = [] of NewDiscordGuild
+
+old_designated_channel.each do |old_desig|
+  snowflake = old_desig.guild_id
+  designated_channel_snowflake = old_desig.channel_id
+
+  cached = cache.discord_guilds[snowflake]?
+
+  if cached.nil?
+    discord_guild = discord_cache.resolve_guild(snowflake.to_u64)
+    cached = DiscordGuild.new(name: discord_guild.name, icon_url: discord_guild.icon_url.not_nil!)
+    cache.discord_guilds[snowflake] = cached
+  end
+
+  name = cached[:name]
+  icon_url = cached[:icon_url]
+
+  last_updated = Time.utc
+
+  hard_coded_data = GUILD_MAP[snowflake]
+
+  new_discord_guild = NewDiscordGuild.new(
+    hard_coded_data[:id], snowflake, name, icon_url, designated_channel_snowflake, last_updated
+  )
+
+  new_discord_guilds << new_discord_guild
+end
 
 new_users = [] of NewUser
 new_discord_users = [] of NewDiscordUser
@@ -249,6 +316,10 @@ old_balance.each_with_index do |old_balance, index|
   )
   new_discord_users << new_discord_user
 
+  if snowflake == JACKS_SNOWFLAKE.to_s
+    created_at = JACKS_CREATED_DATE
+  end
+
   new_user = NewUser.new(
     nil, created_at, username, avatar_url, balance, last_given_dole, admin, banned, new_discord_user, fixed_value
   )
@@ -262,7 +333,7 @@ old_balance.each_with_index do |old_balance, index|
 end
 puts "parsed old_balance"
 
-new_users.sort { |a, b| a.created_at <=> b.created_at }
+new_users.sort! { |a, b| a.created_at <=> b.created_at }
 
 # TODO for special EPOCH users, fix either here or later
 new_users.each_with_index do |new_user, index|
@@ -271,7 +342,7 @@ new_users.each_with_index do |new_user, index|
   new_user.discord_user.id = id
 end
 
-old_ledger.sort { |a, b| a.time <=> b.time }
+old_ledger.sort! { |a, b| a.time <=> b.time }
 
 new_transactions = [] of NewTransaction
 
@@ -338,7 +409,7 @@ old_ledger.each_with_index do |old_transaction, index|
   new_transactions << new_transaction
 end
 
-new_transactions.sort { |a, b| a.time <=> b.time }
+new_transactions.sort! { |a, b| a.time <=> b.time }
 
 puts "parsed transactions"
 
@@ -361,14 +432,23 @@ puts "transactions validated!"
 puts "validating reserve user..."
 
 reserve_user_transations = new_transactions.select { |t| t.from_id == RESERVE_USER_ID }
+reserve_user_transations.sort! { |a, b| a.time <=> b.time }
 
 raise "assertion failed" unless special_case_epoch_users.size + old_benefit.size == reserve_user_transations.size
 
 raise "assertion failed" unless reserve_user_transations.sum { |t| t.amount } == amount_in_circulation
 
+bal = amount_in_circulation
+
 reserve_user_transations.each do |transaction|
+  bal -= transaction.amount
+  transaction.from_new_balance = bal.to_i32
 end
 
 puts "validated reserve user"
+
+new_transactions.each_with_index do |new_transaction, index|
+  new_transaction.id = index + 1
+end
 
 File.write(CACHE_NAME, cache.to_pretty_json)
