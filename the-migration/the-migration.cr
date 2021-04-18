@@ -172,6 +172,7 @@ class NewPump
   property signee_id : Int32
   property to_id : Int32
   property to_new_balance : Int32
+  property amount : Int32
   property time : Time
   property label : String
 end
@@ -446,6 +447,10 @@ reserve_user_transations.each do |transaction|
 end
 
 puts "validated reserve user"
+
+the_pump = NewPump.new(
+  1, 2, 1, amount_in_circulation, amount_in_circulation, EPOCH, "Legacy initial circulation"
+)
 
 new_transactions.each_with_index do |new_transaction, index|
   new_transaction.id = index + 1
