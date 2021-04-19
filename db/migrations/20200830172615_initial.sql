@@ -118,6 +118,8 @@ DROP TABLE "bot_user";
 
 DROP TABLE "discord_user";
 
+DROP TABLE "discord_guild";
+
 DROP TABLE "internal_user";
 
 DROP TABLE "user";
