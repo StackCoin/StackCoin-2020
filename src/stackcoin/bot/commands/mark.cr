@@ -1,5 +1,5 @@
 class StackCoin::Bot::Commands
-  class Circulation < Command
+  class Mark < Command
     getter trigger = "mark"
     getter aliases = [] of String
     getter desc = "Mark a channel as the designated channel for StackCoin"

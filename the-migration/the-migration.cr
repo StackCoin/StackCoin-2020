@@ -100,6 +100,16 @@ class NewDiscordUser
   def initialize(@id, @last_updated, @snowflake)
   end
 
+  def insert(db)
+    db.exec(<<-SQL, @id, @snowflake, @last_updated)
+      INSERT INTO "discord_user" (
+        id, snowflake, last_updated
+      ) VALUES (
+        $1, $2, $3
+      )
+      SQL
+  end
+
   property id : Int32?
   property snowflake : String
   property last_updated : Time
@@ -109,6 +119,17 @@ class NewDiscordGuild
   include ::DB::Serializable
 
   def initialize(@id, @snowflake, @name, @icon_url, @designated_channel_snowflake, @last_updated)
+  end
+
+  def insert(db)
+    puts "inserting guild #{@name}"
+    db.exec(<<-SQL, @id, @snowflake, @name, @icon_url, @designated_channel_snowflake, @last_updated)
+      INSERT INTO "discord_guild" (
+        id, snowflake, name, icon_url, designated_channel_snowflake, last_updated
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6
+      )
+      SQL
   end
 
   property id : Int32
@@ -123,6 +144,26 @@ class NewUser
   include ::DB::Serializable
 
   def initialize(@id, @created_at, @username, @avatar_url, @balance, @last_given_dole, @admin, @banned, @discord_user, @fixed_value)
+  end
+
+  def insert(db)
+    puts "inserting user #{@username}"
+    user_id = db.query_one(<<-SQL, @id, @created_at, @username, @avatar_url, @balance, @last_given_dole, @admin, @banned, as: Int32)
+      INSERT INTO "user" (
+        id,
+        created_at,
+        username,
+        avatar_url,
+        balance,
+        last_given_dole,
+        admin,
+        banned
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8
+      ) RETURNING id
+      SQL
+
+    discord_user.insert(db)
   end
 
   property id : Int32?
@@ -152,6 +193,24 @@ class NewTransaction
   def initialize(@id, @from_id, @from_new_balance, @to_id, @to_new_balance, @amount, @time, @label)
   end
 
+  def insert(db)
+    puts "inserting transaction ##{@id}"
+    transaction_id = db.query_one(<<-SQL, @id, @from_id, @from_new_balance, @to_id, @to_new_balance, @amount, @time, @label, as: Int32)
+      INSERT INTO "transaction" (
+        id,
+        from_id,
+        from_new_balance,
+        to_id,
+        to_new_balance,
+        amount,
+        time,
+        label
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8
+      ) RETURNING id
+      SQL
+  end
+
   property id : Int32?
   property from_id : Int32
   property from_new_balance : Int32
@@ -165,7 +224,24 @@ end
 class NewPump
   include ::DB::Serializable
 
-  def initialize(@id, @signee_id, @to_id, @to_new_balance, @time, @label)
+  def initialize(@id, @signee_id, @to_id, @to_new_balance, @amount, @time, @label)
+  end
+
+  def insert(db)
+    puts "inserting pump ##{@id}"
+    pump_id = db.query_one(<<-SQL, @id, @signee_id, @to_id, @to_new_balance, @amount, @time, @label, as: Int32)
+      INSERT INTO "pump" (
+        id,
+        signee_id,
+        to_id,
+        to_new_balance,
+        amount,
+        time,
+        label
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7
+      ) RETURNING id
+      SQL
   end
 
   property id : Int32
@@ -449,11 +525,33 @@ end
 puts "validated reserve user"
 
 the_pump = NewPump.new(
-  1, 2, 1, amount_in_circulation, amount_in_circulation, EPOCH, "Legacy initial circulation"
+  1, 2, 1, amount_in_circulation.to_i32, amount_in_circulation.to_i32, EPOCH, "Legacy initial circulation"
 )
 
 new_transactions.each_with_index do |new_transaction, index|
   new_transaction.id = index + 1
 end
+
+puts "inserting things into the database...."
+
+new_db.transaction do |tx|
+  cnn = tx.connection
+
+  new_discord_guilds.each do |new_discord_guild|
+    new_discord_guild.insert(cnn)
+  end
+
+  new_users.each do |new_user|
+    new_user.insert(cnn)
+  end
+
+  the_pump.insert(cnn)
+
+  new_transactions.each do |new_transaction|
+    new_transaction.insert(cnn)
+  end
+end
+
+puts "inserted things into the database"
 
 File.write(CACHE_NAME, cache.to_pretty_json)
