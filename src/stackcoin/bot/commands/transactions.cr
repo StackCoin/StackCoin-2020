@@ -42,7 +42,7 @@ class StackCoin::Bot::Commands
       ) if fields.size == 0
 
       send_embed(message, Discord::Embed.new(
-        title: "_Transactions:_",
+        title: "_Transactions: (page #{page})_",
         fields: fields
       ))
     end

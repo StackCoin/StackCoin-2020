@@ -91,7 +91,7 @@ class StackCoin::Core::Info
       FROM "transaction"
         LEFT JOIN "user" AS "from" ON "transaction".from_id = "from".id
         LEFT JOIN "user" AS "to" ON "transaction".to_id = "to".id
-      ORDER BY "transaction".id DESC LIMIT $1 OFFSET $2;
+      ORDER BY time DESC LIMIT $1 OFFSET $2;
       SQL
 
     Result::Transactions.new("Transactions, limited by #{limit} and offsetted by #{offset}", entries: entries)
