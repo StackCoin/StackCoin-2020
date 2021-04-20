@@ -42,14 +42,15 @@ class StackCoin::Core::Graph
     datapoints = 0
     reader, writer = IO.pipe
 
-    balance_over_time.each do |b|
-      datapoints += 1
-      writer.puts("#{b.time},#{b.balance},#{b.amount}")
-    end
-    writer.close
-
-    if datapoints <= 1
+    if balance_over_time.size <= 1
       return Result::NotEnoughDatapoints.new("Not enough datapoints!")
+    end
+
+    spawn do
+      balance_over_time.each do |b|
+        writer.puts("#{b.time},#{b.balance},#{b.amount}")
+      end
+      writer.close
     end
 
     random = UUID.random

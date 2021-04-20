@@ -38,8 +38,11 @@ class StackCoin::Bot::Commands
             TEXT
         )
 
+        thumbnail = Discord::EmbedThumbnail.new(profile.avatar_url)
+
         send_embed(message, Discord::Embed.new(
           title: "_Profile:_",
+          thumbnail: thumbnail,
           fields: fields
         ))
       else

@@ -47,6 +47,7 @@ class StackCoin::Core::Info
       class Data
         include ::DB::Serializable
         getter id : Int32
+        getter avatar_url : String
         getter username : String
         getter balance : Int32
         getter created_at : Time
@@ -104,7 +105,7 @@ class StackCoin::Core::Info
 
     data = Result::Profile::Data.from_rs(cnn.query(<<-SQL, user_id))
       SELECT
-        id, username, balance, created_at, last_given_dole
+        id, avatar_url, username, balance, created_at, last_given_dole
       FROM "user" WHERE id = $1
       SQL
 
