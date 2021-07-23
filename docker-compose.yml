@@ -1,9 +1,9 @@
-version: '3'
+version: "3"
 
 services:
   stackcoin:
-    image: jackharrhy/stackcoin
     build: ./.
+    image: jackharrhy/stackcoin
     env_file:
       - ./.env
     ports:
@@ -19,12 +19,20 @@ services:
       - 127.0.0.1:5432:5432
     networks:
       - backend
+    volumes:
+      - db:/var/lib/postgresql/data
 
   hasura:
-    image: hasura/graphql-engine:v1.3.2
+    image: hasura/graphql-engine:v2.0.3
     env_file:
       - ./.env
-    network_mode: "host"
+    ports:
+      - 127.0.0.1:8080:8080
+    depends_on:
+      - postgres
+
+volumes:
+  db:
 
 networks:
   backend:

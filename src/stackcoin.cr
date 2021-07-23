@@ -8,12 +8,10 @@ module StackCoin
   def self.run!
     Dir.mkdir_p("/tmp/stackcoin/")
 
-    # TODO nuke_and_populate_hasura_things
-
     run_migrations
 
-    spawn(Api::External.run!)
-    spawn(Api::Internal.run!)
+    # spawn(Api::External.run!)
+    # spawn(Api::Internal.run!)
 
     spawn(Bot.run!)
 
