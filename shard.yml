@@ -31,13 +31,13 @@ dependencies:
     github: kemalcr/kemal
     branch: master
 
-  runcobo:
-    github: runcobo/runcobo
+  #runcobo:
+  #  github: runcobo/runcobo
 
   sqlite3:
     github: crystal-lang/crystal-sqlite3
 
-  graphql:
-    github: graphql-crystal/graphql
+  #graphql:
+  #  github: graphql-crystal/graphql
 
 crystal: 1.0.0

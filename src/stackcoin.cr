@@ -2,7 +2,8 @@ require "./stackcoin/config"
 require "./stackcoin/db"
 require "./stackcoin/core"
 require "./stackcoin/bot"
-require "./stackcoin/api"
+
+# require "./stackcoin/api"
 
 module StackCoin
   def self.run!
