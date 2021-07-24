@@ -3,6 +3,7 @@ require "./stackcoin/db"
 require "./stackcoin/core"
 require "./stackcoin/bot"
 
+# TODO bring back api
 # require "./stackcoin/api"
 
 module StackCoin
@@ -11,6 +12,7 @@ module StackCoin
 
     run_migrations
 
+    # TODO bring back api
     # spawn(Api::External.run!)
     # spawn(Api::Internal.run!)
 

@@ -270,15 +270,16 @@ old_last_given_dole = old_db.query_all("select * from last_given_dole", as: OldL
 puts "query'd old_db"
 
 GUILD_MAP = {
-  "497544520695808000" => {id: 1}, # compsci bois
-  "72070136256794624"  => {id: 2}, # jke
-  "512319868880551946" => {id: 3}, # compsci bys
-  "510914895001157632" => {id: 4}, # cheesetown
-  "411709413913788419" => {id: 5}, # lads
-  "689213612362825778" => {id: 6}, # colane giftware
-  "733961738742923314" => {id: 7}, # mun casual
-  "742212655884009605" => {id: 8}, # pog bunker
-  "629418589715300412" => {id: 9}, # the rock
+  "497544520695808000" => {id: 1},  # compsci bois
+  "72070136256794624"  => {id: 2},  # jke
+  "512319868880551946" => {id: 3},  # compsci bys
+  "510914895001157632" => {id: 4},  # cheesetown
+  "411709413913788419" => {id: 5},  # lads
+  "689213612362825778" => {id: 6},  # colane giftware
+  "733961738742923314" => {id: 7},  # mun casual
+  "742212655884009605" => {id: 8},  # pog bunker
+  "629418589715300412" => {id: 9},  # the rock
+  "863232324498227200" => {id: 10}, # space station sanitation
 }
 
 new_discord_guilds = [] of NewDiscordGuild
@@ -291,7 +292,8 @@ old_designated_channel.each do |old_desig|
 
   if cached.nil?
     discord_guild = discord_cache.resolve_guild(snowflake.to_u64)
-    cached = DiscordGuild.new(name: discord_guild.name, icon_url: discord_guild.icon_url.not_nil!)
+    icon_url = discord_guild.icon_url || ""
+    cached = DiscordGuild.new(name: discord_guild.name, icon_url: icon_url)
     cache.discord_guilds[snowflake] = cached
   end
 

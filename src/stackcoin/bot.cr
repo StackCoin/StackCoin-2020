@@ -62,7 +62,8 @@ class StackCoin::Bot
       Commands::Dole.new,
       Commands::Graph.new,
       Commands::Leaderboard.new,
-      Commands::Login.new,
+      # TODO bring back when api is ready
+      # Commands::Login.new,
       Commands::Mark.new,
       Commands::Open.new,
       Commands::Profile.new,
