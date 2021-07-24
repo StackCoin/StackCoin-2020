@@ -23,17 +23,51 @@ class StackCoin::Bot
 
   class_getter lookup : Hash(String, Command) = {} of String => Command
   class_getter commands : Hash(String, Command) = {} of String => Command
+  getter help_command : Command
 
   def initialize
     @client = Discord::Client.new(token: TOKEN, client_id: CLIENT_ID)
     @cache = Discord::Cache.new(@client)
     @client.cache = @cache
 
-    load_commands
+    all_commands = [
+      Commands::Balance.new,
+      Commands::Ban.new,
+      Commands::Circulation.new,
+      Commands::Dole.new,
+      Commands::Graph.new,
+      Commands::Leaderboard.new,
+      # TODO bring back when api is ready
+      # Commands::Login.new,
+      Commands::Mark.new,
+      Commands::Open.new,
+      Commands::Profile.new,
+      Commands::Pump.new,
+      Commands::Reserves.new,
+      Commands::Send.new,
+      Commands::Transactions.new,
+      Commands::Unban.new,
+    ]
 
+    @help_command = Commands::Help.new(all_commands)
+
+    all_commands << @help_command
+
+    all_commands.each do |command|
+      @@commands[command.trigger] = command
+      @@lookup[command.trigger] = command
+      command.aliases.each do |command_alias|
+        @@lookup[command_alias] = command
+      end
+    end
+
+    setup_handle_message
+  end
+
+  def setup_handle_message
     @client.on_message_create do |message|
       begin
-        next if message.guild_id.is_a?(Nil) || message.author.bot
+        next if message.author.bot
         handle_message(message)
       rescue ex : Parser::Error
         send_message(message, "Invalid argument(s): #{ex.message}")
@@ -54,46 +88,19 @@ class StackCoin::Bot
     @client.create_message(message.channel_id, content)
   end
 
-  def load_commands
-    all_commands = [
-      Commands::Balance.new,
-      Commands::Ban.new,
-      Commands::Circulation.new,
-      Commands::Dole.new,
-      Commands::Graph.new,
-      Commands::Leaderboard.new,
-      # TODO bring back when api is ready
-      # Commands::Login.new,
-      Commands::Mark.new,
-      Commands::Open.new,
-      Commands::Profile.new,
-      Commands::Pump.new,
-      Commands::Reserves.new,
-      Commands::Send.new,
-      Commands::Transactions.new,
-      Commands::Unban.new,
-    ]
-
-    all_commands << Commands::Help.new(all_commands)
-
-    all_commands.each do |command|
-      @@commands[command.trigger] = command
-      @@lookup[command.trigger] = command
-      command.aliases.each do |command_alias|
-        @@lookup[command_alias] = command
-      end
-    end
-  end
-
   def handle_message(message)
-    # TODO check if designated channel of guild
-
     parsed = Parser.parse(message.content)
 
     return if parsed.nil?
 
+    valid_check = Core::Group.validate_group_channel(message.guild_id, message.channel_id)
+    unless valid_check.is_a?(Core::Group::Result::ValidGroupChannel)
+      send_message(message, valid_check.message)
+      return
+    end
+
     if parsed.command == ""
-      # TODO show help
+      @help_command.invoke(message, parsed)
       return
     end
 
