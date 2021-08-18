@@ -38,10 +38,11 @@ parser = OptionParser.parse do |parser|
     exit
   end
 
-  parser.on("-s", "--schema", "Print the schema of the internal GraphQL Api") do
-    puts StackCoin::Api::Internal::Gql.schema.document.to_s
-    exit
-  end
+  # TODO bringb back api
+  # parser.on("-s", "--schema", "Print the schema of the internal GraphQL Api") do
+  #  puts StackCoin::Api::Internal::Gql.schema.document.to_s
+  #   exit
+  # end
 
   parser.on("-h", "--help", "Show this help") do
     puts parser

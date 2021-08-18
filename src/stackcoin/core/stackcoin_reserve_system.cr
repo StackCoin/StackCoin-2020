@@ -87,15 +87,16 @@ class StackCoin::Core::StackCoinReserveSystem
       UPDATE "user" SET balance = $1 WHERE id = $2
       SQL
 
-    pump_id = cnn.query_one(<<-SQL, signee_id, user_id, new_balance, now, label, as: Int32)
+    pump_id = cnn.query_one(<<-SQL, signee_id, user_id, new_balance, amount, now, label, as: Int32)
       INSERT INTO "pump" (
         signee_id,
         to_id,
         to_new_balance,
+        amount,
         time,
         label
       ) VALUES (
-        $1, $2, $3, $4, $5
+        $1, $2, $3, $4, $5, $5
       ) RETURNING id
       SQL
 

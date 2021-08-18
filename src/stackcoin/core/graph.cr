@@ -22,7 +22,7 @@ class StackCoin::Core::Graph
   private class BalanceAtTime
     include ::DB::Serializable
     getter time : Time
-    getter to_new_balance : Int32
+    getter balance : Int32
     getter amount : Int32
   end
 
@@ -32,21 +32,25 @@ class StackCoin::Core::Graph
     end
 
     balance_over_time = BalanceAtTime.from_rs(cnn.query(<<-SQL, user_id))
-      SELECT time, to_new_balance, amount FROM "transaction"
-      WHERE to_id = $1 ORDER BY time
+      (
+        SELECT time, to_new_balance as balance, amount FROM "transaction" WHERE to_id = $1
+        UNION
+        SELECT time, from_new_balance as balance, amount FROM "transaction" WHERE from_id = $1
+      ) ORDER BY time
       SQL
 
     datapoints = 0
     reader, writer = IO.pipe
 
-    balance_over_time.each do |b|
-      datapoints += 1
-      writer.puts("#{b.time},#{b.to_new_balance},#{b.amount}")
-    end
-    writer.close
-
-    if datapoints <= 1
+    if balance_over_time.size <= 1
       return Result::NotEnoughDatapoints.new("Not enough datapoints!")
+    end
+
+    spawn do
+      balance_over_time.each do |b|
+        writer.puts("#{b.time},#{b.balance},#{b.amount}")
+      end
+      writer.close
     end
 
     random = UUID.random

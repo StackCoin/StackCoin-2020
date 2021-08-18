@@ -24,8 +24,17 @@ CREATE TABLE "bot_user" (
 
 CREATE TABLE "discord_user" (
   "id" integer PRIMARY KEY references "user"(id),
-  "last_updated" timestamp without time zone not null,
-  "snowflake" text not null UNIQUE
+  "snowflake" text not null UNIQUE,
+  "last_updated" timestamp without time zone not null
+);
+
+CREATE TABLE "discord_guild" (
+  "id" serial PRIMARY KEY,
+  "snowflake" text not null UNIQUE,
+  "name" text not null,
+  "icon_url" text not null,
+  "designated_channel_snowflake" text not null UNIQUE,
+  "last_updated" timestamp without time zone not null
 );
 
 CREATE TABLE "transaction" (
@@ -45,6 +54,7 @@ CREATE TABLE "pump" (
   "signee_id" integer not null references "user"(id),
   "to_id" integer not null references "internal_user"(id),
   "to_new_balance" integer not null CHECK ("to_new_balance" >= 0),
+  "amount" integer not null CHECK ("amount" >= 1),
   "time" timestamp not null,
   "label" text not null,
   CHECK ("signee_id" <> "to_id")
@@ -67,6 +77,7 @@ CREATE TABLE "request" (
 WITH stackcoin_reserve_system_user AS (
   INSERT INTO "user"
     (
+      id,
       created_at,
       username,
       avatar_url,
@@ -77,6 +88,7 @@ WITH stackcoin_reserve_system_user AS (
     )
   VALUES
     (
+      1,
       now() at time zone 'utc',
       'StackCoin Reserve System',
       'https://stackcoin.world/assets/default_avatar.png',
@@ -105,6 +117,8 @@ DROP TYPE request_status;
 DROP TABLE "bot_user";
 
 DROP TABLE "discord_user";
+
+DROP TABLE "discord_guild";
 
 DROP TABLE "internal_user";
 

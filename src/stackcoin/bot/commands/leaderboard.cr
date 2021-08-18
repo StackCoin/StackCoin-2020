@@ -42,7 +42,7 @@ class StackCoin::Bot::Commands
       ) if fields.size == 0
 
       send_embed(message, Discord::Embed.new(
-        title: "_Leaderboard:_",
+        title: "_Leaderboard: (page #{page})_",
         fields: fields
       ))
     end

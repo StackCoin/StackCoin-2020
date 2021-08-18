@@ -1,7 +1,7 @@
 class StackCoin::Bot::Commands
   class Dole < Command
     getter trigger = "dole"
-    getter aliases = ["d"]
+    getter aliases = ["d", "please", "gimme"]
     getter desc = "Collect some funds from the StackCoin Reserve System"
 
     def initialize
