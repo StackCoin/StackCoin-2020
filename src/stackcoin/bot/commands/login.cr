@@ -27,7 +27,10 @@ class StackCoin::Bot::Commands
             Here's your one time login link:
             #{result.link}
             MESSAGE
-          send_message(message, "One time login link sent to you, check your direct messages with this bot")
+
+          unless message.guild_id.nil?
+            send_message(message, "One time login link sent to you, check your direct messages with this bot")
+          end
         rescue Discord::CodeException
           send_message(message, "Failed to send your a direct message, cannot send one time link via Discord")
         end

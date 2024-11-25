@@ -15,11 +15,14 @@ dependencies:
   pg:
     github: will/crystal-pg
 
+  logger:
+    github: crystal-lang/logger.cr
+
   micrate:
     github: amberframework/micrate
 
   discordcr:
-    github: shardlab/discordcr
+    github: soya-daizu/discordcr
 
   dotenv:
     github: gdotdesign/cr-dotenv
@@ -31,13 +34,11 @@ dependencies:
     github: kemalcr/kemal
     branch: master
 
-  #runcobo:
-  #  github: runcobo/runcobo
-
   sqlite3:
     github: crystal-lang/crystal-sqlite3
 
-  #graphql:
-  #  github: graphql-crystal/graphql
+  runcobo:
+    github: runcobo/runcobo
 
-crystal: 1.0.0
+  graphql:
+    github: graphql-crystal/graphql

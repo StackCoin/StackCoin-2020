@@ -33,7 +33,8 @@ class StackCoin::Core::SessionStore
     end
 
     def self.one_time_link(id : String)
-      URI.encode("#{STACKCOIN_SITE_BASE}/auth?one_time_key=#{id}")
+      encoded_id = URI.encode_path(id)
+      "#{STACKCOIN_SITE_BASE}/auth?one_time_key=#{id}"
     end
 
     def self.to_cookie(id : String)
@@ -79,11 +80,11 @@ class StackCoin::Core::SessionStore
   end
 
   private def self.is_session_still_valid(session : Session) : Bool
-    session.expires_at < Time.utc
+    session.expires_at > Time.utc
   end
 
   private def self.is_session_still_valid(session_key : String) : Bool
-    if session = in_memory_session_store[one_time_key]?
+    if session = in_memory_session_store[session_key]?
       is_session_still_valid(session)
     else
       false

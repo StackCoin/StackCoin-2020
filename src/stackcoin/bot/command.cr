@@ -25,7 +25,11 @@ class StackCoin::Bot
     end
 
     def send_message(message, content)
-      client.create_message(message.channel_id, content)
+      client.create_message(
+        message.channel_id,
+        content,
+        message_reference: message.message_reference,
+      )
     end
 
     def send_embed(message, emb : Discord::Embed)
@@ -39,7 +43,12 @@ class StackCoin::Bot
         text: "StackCoin™",
         icon_url: "https://i.imgur.com/CsVxtvM.png"
       )
-      client.create_message(message.channel_id, content, emb)
+      client.create_message(
+        message.channel_id,
+        content,
+        emb,
+        message_reference: message.message_reference,
+      )
     end
   end
 end

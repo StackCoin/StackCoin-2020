@@ -37,8 +37,7 @@ class StackCoin::Bot
       Commands::Dole.new,
       Commands::Graph.new,
       Commands::Leaderboard.new,
-      # TODO bring back when api is ready
-      # Commands::Login.new,
+      Commands::Login.new,
       Commands::Mark.new,
       Commands::Open.new,
       Commands::Profile.new,
@@ -85,7 +84,11 @@ class StackCoin::Bot
   end
 
   def send_message(message, content)
-    @client.create_message(message.channel_id, content)
+    @client.create_message(
+      message.channel_id,
+      content,
+      message_reference: message.message_reference,
+    )
   end
 
   def handle_message(message)
@@ -94,7 +97,7 @@ class StackCoin::Bot
     return if parsed.nil?
 
     valid_check = Core::Group.validate_group_channel(message.guild_id, message.channel_id)
-    unless valid_check.is_a?(Core::Group::Result::ValidGroupChannel)
+    unless valid_check.is_a?(Core::Group::Result::ValidChannel) || parsed.command == "mark"
       send_message(message, valid_check.message)
       return
     end

@@ -21,7 +21,7 @@ class StackCoin::Core::Banned
 
   def self.ban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?) : Result::Base
     unless invokee_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new("You doesn't have a user account")
+      return Result::NoSuchUserAccount.new("You don't have a user account")
     end
 
     unless user_id.is_a?(Int32)
@@ -55,7 +55,7 @@ class StackCoin::Core::Banned
 
   def self.unban(tx : ::DB::Transaction, invokee_id : Int32?, user_id : Int32?) : Result::Base
     unless invokee_id.is_a?(Int32)
-      return Result::NoSuchUserAccount.new("You doesn't have a user account")
+      return Result::NoSuchUserAccount.new("You don't have a user account")
     end
 
     unless user_id.is_a?(Int32)

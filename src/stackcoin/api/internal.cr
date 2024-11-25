@@ -1,4 +1,5 @@
 require "http/server"
+require "log"
 
 class StackCoin::Api::Internal
 end
@@ -6,10 +7,20 @@ end
 require "./internal/*"
 
 class StackCoin::Api::Internal
-  def self.not_found(r)
-    r.status_code = 404
+  Log = ::Log.for("stackcoin.api.internal")
+
+  def self.basic_message(r, message)
+    r.status_code = 200
     r.content_type = "text/plain"
-    r.print("Not found")
+    r.print(message)
+  end
+
+  def self.not_found(r)
+    basic_message(r, "Not found")
+  end
+
+  def self.invalid_method(r)
+    basic_message(r, "Invalid method")
   end
 
   class SchemaExecuteInput
@@ -32,7 +43,7 @@ class StackCoin::Api::Internal
       case resource
       when "/auth"
         unless method == "GET"
-          next not_found(r)
+          next invalid_method(r)
         end
 
         if token = context.request.headers["Authorization"]?
@@ -59,7 +70,7 @@ class StackCoin::Api::Internal
         next
       when "/graphql"
         unless method == "POST"
-          next not_found(r)
+          next invalid_method(r)
         end
 
         headers = context.request.headers
@@ -92,6 +103,7 @@ class StackCoin::Api::Internal
     end
 
     address = server.bind_tcp(4000)
+    Log.info { "Listening on #{address}" }
     server.listen
   end
 end

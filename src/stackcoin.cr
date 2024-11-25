@@ -2,19 +2,18 @@ require "./stackcoin/config"
 require "./stackcoin/db"
 require "./stackcoin/core"
 require "./stackcoin/bot"
-
-# TODO bring back api
-# require "./stackcoin/api"
+require "./stackcoin/api"
 
 module StackCoin
+  TMP_DIR = "/tmp/stackcoin/"
+
   def self.run!
-    Dir.mkdir_p("/tmp/stackcoin/")
+    Dir.mkdir_p(TMP_DIR)
 
     run_migrations
 
-    # TODO bring back api
-    # spawn(Api::External.run!)
-    # spawn(Api::Internal.run!)
+    spawn(Api::External.run!)
+    spawn(Api::Internal.run!)
 
     spawn(Bot.run!)
 

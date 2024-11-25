@@ -96,12 +96,14 @@ class StackCoin::Core::StackCoinReserveSystem
         time,
         label
       ) VALUES (
-        $1, $2, $3, $4, $5, $5
+        $1, $2, $3, $4, $5, $6
       ) RETURNING id
       SQL
 
+    new_balance = Bank.balance(cnn, user_id).as(Bank::Result::Balance).balance
+
     return Result::Pump.new(
-      "Successfully pumped the StackCoin Reserve System with #{amount} STK, with label: \"#{label}\"",
+      "Successfully pumped the StackCoin Reserve System with #{amount} STK, with label: \"#{label}\", the new amount of STK in the reserve is #{new_balance} STK",
       pump_id: pump_id,
       stackcoin_reserve_system_user_balance: new_balance,
     )

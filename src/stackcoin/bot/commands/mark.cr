@@ -12,7 +12,23 @@ class StackCoin::Bot::Commands
         raise Parser::Error.new("Expected no arguments, got #{parsed.arguments.size}")
       end
 
-      send_message(message, "TODO")
+      guild_id = message.guild_id
+
+      unless guild_id.is_a?(Discord::Snowflake)
+        raise Parser::Error.new("Cannot invoke command in DMs")
+      end
+
+      result = nil
+      DB.transaction do |tx|
+        cnn = tx.connection
+        invokee_id = user_id_from_snowflake(cnn, message.author.id)
+        result = Core::Group.set_group_channel(tx, invokee_id, guild_id, message.channel_id)
+      end
+      result = result.as(Result::Base)
+
+      send_message(message, result.message)
+
+      result
     end
   end
 end

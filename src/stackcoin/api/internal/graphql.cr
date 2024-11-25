@@ -61,8 +61,8 @@ class StackCoin::Api::Internal::Gql
     include GraphQL::QueryType
 
     @[GraphQL::Field]
-    def pid : Int64
-      Process.pid
+    def pid : String
+      Process.pid.to_s
     end
   end
 

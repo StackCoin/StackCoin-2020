@@ -101,6 +101,8 @@ WITH stackcoin_reserve_system_user AS (
 )
 INSERT INTO "internal_user" SELECT id, username AS identifier FROM stackcoin_reserve_system_user;
 
+SELECT setval('"user_id_seq"', (SELECT MAX(id) FROM "user"));
+
 COMMIT;
 
 -- +micrate Down

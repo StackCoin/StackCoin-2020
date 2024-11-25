@@ -552,6 +552,35 @@ new_db.transaction do |tx|
   new_transactions.each do |new_transaction|
     new_transaction.insert(cnn)
   end
+
+  cnn.exec(<<-SQL
+    DO $$ 
+    DECLARE
+        seq RECORD;
+        tables_to_fix text[] := ARRAY['user', 'discord_guild', 'transaction', 'pump', 'request'];
+    BEGIN
+        FOR seq IN
+            SELECT
+                table_name,
+                column_name,
+                pg_get_serial_sequence(format('%I.%I', table_schema, table_name), column_name) AS seq_name
+            FROM 
+                information_schema.columns
+            WHERE
+                column_default LIKE 'nextval(%'
+                AND table_name = ANY(tables_to_fix)
+        LOOP
+            EXECUTE format(
+                'SELECT setval(%L, COALESCE(MAX(%I), 0) + 1, false) FROM %I.%I',
+                seq.seq_name,
+                seq.column_name,
+                'public',
+                seq.table_name
+            );
+        END LOOP;
+    END $$;
+    SQL
+  )
 end
 
 puts "inserted things into the database"

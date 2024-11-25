@@ -54,7 +54,7 @@ class StackCoin::Core::Graph
     end
 
     random = UUID.random
-    image_filename = "/tmp/stackcoin/graph_#{user_id}_#{random}.png"
+    image_filename = "#{StackCoin::TMP_DIR}/graph_#{user_id}_#{random}.png"
     title = "User ##{user_id} - #{Time.utc}"
 
     process = Process.new(
